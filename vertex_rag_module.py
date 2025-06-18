@@ -1,8 +1,11 @@
 import os
 import vertexai
+import logging
 from typing import List, Dict
 from google.api_core.client_options import ClientOptions
 from google.cloud import discoveryengine_v1 as discoveryengine
+
+logger = logging.getLogger(__name__)
 
 PROJECT_ID = os.environ.get("GCP_PROJECT_ID") # Your Google Cloud project ID.
 LOCATION = os.environ.get("GCP_LOCATION") # The region of your search engine.
@@ -17,14 +20,14 @@ class VertexAICaller:
         self.engine_id = engine_id
         try:
             vertexai.init(project=PROJECT_ID, location=LOCATION)
-            print(f"Vertex AI initialized for project {PROJECT_ID} in location {LOCATION}")
+            logger.info(f"Vertex AI initialized for project {PROJECT_ID} in location {LOCATION}")
         except Exception as e:
-            print(f"Error initializing Vertex AI: {e}")
+            logger.error(f"Error initializing Vertex AI: {e}")
             # Handle this error appropriately in a production environment (e.g., exit, log, health check fail)
 
     def run_vertex_ai_search(self, query: str) -> List[Dict[str, str]]:
         """Perform similarity search on Vertex AI search app, returing results."""
-        print(f"Attempting to retrieve context for query: '{query}'")
+        logger.info(f"Attempting to retrieve context for query: '{query}'")
         client_options = (ClientOptions(api_endpoint=f"{self.location}-discoveryengine.googleapis.com") if self.location != "global" else None)
 
         client = discoveryengine.SearchServiceClient(client_options=client_options)
@@ -36,15 +39,15 @@ class VertexAICaller:
 
         content_search_spec = discoveryengine.SearchRequest.ContentSearchSpec(
             snippet_spec=discoveryengine.SearchRequest.ContentSearchSpec.SnippetSpec(
-                return_snippet=True  # Request snippets for direct context
+                return_snippet=True  
             ),
             summary_spec=discoveryengine.SearchRequest.ContentSearchSpec.SummarySpec(
-                summary_result_count=3,  # How many summaries to return
-                include_citations=True,  # Crucial for grounding and transparency
+                summary_result_count=3,  
+                include_citations=True,
                 ignore_adversarial_query=True,
                 ignore_non_summary_seeking_query=True,
                 model_spec=discoveryengine.SearchRequest.ContentSearchSpec.SummarySpec.ModelSpec(
-                    version="stable", # Use a stable LLM version for summarization
+                    version="stable", 
                 ),
             ),
         )
@@ -52,7 +55,7 @@ class VertexAICaller:
         request = discoveryengine.SearchRequest(
             serving_config=serving_config,
             query=query,
-            page_size=5,  # Number of raw search results to consider
+            page_size=5,
             content_search_spec=content_search_spec,
             query_expansion_spec=discoveryengine.SearchRequest.QueryExpansionSpec(
                 condition=discoveryengine.SearchRequest.QueryExpansionSpec.Condition.AUTO,
@@ -82,9 +85,9 @@ class VertexAICaller:
                     "citations": citations,
                     "type": "summary"  # Add type to distinguish summary from snippets
                 })
-                print("DEBUG: Added overall summary to contexts.")
+                logger.debug("DEBUG: Added overall summary to contexts.")
             else:
-                print("DEBUG: No overall summary found in response.")
+                logger.debug("DEBUG: No overall summary found in response.")
 
             # 2. Iterate through all SearchResult items across pages
             for search_result_item in response:
@@ -100,14 +103,14 @@ class VertexAICaller:
                         "citations": [source_url] if source_url != "N/A" else [],
                         "type": "snippet"  # Add type to distinguish snippets from summary
                     })
-                    print(f"DEBUG: Added snippet from {source_url} to contexts.")
+                    logger.debug(f"DEBUG: Added snippet from {source_url} to contexts.")
                 else:
-                    print("DEBUG: No snippet found for a search result item.")
+                    logger.debug("DEBUG: No snippet found for a search result item.")
 
 
         except Exception as e:
-            print(f"Error during Vertex AI Search retrieval: {e}")
+            logger.exception(f"Error during Vertex AI Search retrieval: {e}")
             # In a real app, you might want to return an error or empty context
         
-        print(f"DEBUG: Final retrieved contexts count: {len(retrieved_contexts)}")
+        logger.debug(f"DEBUG: Final retrieved contexts count: {len(retrieved_contexts)}")
         return retrieved_contexts
