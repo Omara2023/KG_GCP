@@ -6,18 +6,19 @@ from vertex_rag_module import VertexAICaller
 app = Flask(__name__)
 
 @app.route('/query', methods=['POST'])
-def ask():
-    """
-    Handles incoming POST requests with a user query, performs RAG,
-    and returns the grounded answer.
-    """
+def handle_query():
+    """Handles incoming POST requests with a user query, performs RAG, and returns the grounded answer."""
+    print("Entered backend handler successfully.")
+
     if not request.is_json:
+        print("Request not json apparently.")
         return jsonify({"error": "Request must be JSON"}), 400
 
     data = request.get_json()
     user_query = data.get('query')
 
     if not user_query:
+        print("No user query apparently.")
         return jsonify({"error": "Missing 'query' in request"}), 400
 
     print(f"Received query from frontend: '{user_query}'")
