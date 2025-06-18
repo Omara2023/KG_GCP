@@ -64,30 +64,46 @@ class VertexAICaller:
 
         retrieved_contexts = []
         try:
-            page_result = client.search(request=request)
+            # page_result here is the TOP-LEVEL SearchResponse object
+            response = client.search(request=request)
 
-            for response_obj in page_result:
-                if response_obj.summary and response_obj.summary.summary_text:
-                    summary_text = response_obj.summary.summary_text
-                    citations = []
-                    if response_obj.summary.citation_metadata:
-                        for citation_source in response_obj.summary.citation_metadata.citation_sources:
-                            if citation_source.uri:
-                                citations.append(citation_source.uri)
-                    retrieved_contexts.append({
-                        "content": summary_text,
-                        "citations": citations
-                    })
-                elif response_obj.search_result and response_obj.search_result.snippet:
-                    snippet_text = response_obj.search_result.snippet.snippet
-                    source_url = response_obj.search_result.document.uri if response_obj.search_result.document else "N/A"
+            # 1. Process the overall summary first (if it exists)
+            if response.summary and response.summary.summary_text:
+                summary_text = response.summary.summary_text
+                citations = []
+                if response.summary.citation_metadata:
+                    for citation_source in response.summary.citation_metadata.citation_sources:
+                        if citation_source.uri:
+                            citations.append(citation_source.uri)
+                retrieved_contexts.append({
+                    "content": summary_text,
+                    "citations": citations,
+                    "type": "summary" # Add type to distinguish summary from snippets
+                })
+                print(f"DEBUG: Added overall summary to contexts.")
+            else:
+                print("DEBUG: No overall summary found in response.")
+
+
+            # 2. Iterate through individual search results for snippets
+            for search_result_item in response.results: # <-- Iterate over .results
+                # Each search_result_item is a discoveryengine.SearchResponse.SearchResult
+                if search_result_item.snippet and search_result_item.snippet.snippet:
+                    snippet_text = search_result_item.snippet.snippet
+                    source_url = search_result_item.document.uri if search_result_item.document and search_result_item.document.uri else "N/A"
                     retrieved_contexts.append({
                         "content": snippet_text,
-                        "citations": [source_url] if source_url != "N/A" else []
+                        "citations": [source_url] if source_url != "N/A" else [],
+                        "type": "snippet" # Add type to distinguish snippets from summary
                     })
+                    print(f"DEBUG: Added snippet from {source_url} to contexts.")
+                else:
+                    print("DEBUG: No snippet found for a search result item.")
+
 
         except Exception as e:
             print(f"Error during Vertex AI Search retrieval: {e}")
             # In a real app, you might want to return an error or empty context
         
+        print(f"DEBUG: Final retrieved contexts count: {len(retrieved_contexts)}")
         return retrieved_contexts
