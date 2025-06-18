@@ -5,8 +5,6 @@ from .vertex_rag_module import VertexAICaller
 
 app = Flask(__name__)
 
-SEARCH_ENGINE_ID = os.environ.get("SEARCH_ENGINE_ID", "your-search-app-id")
-
 @app.route('/query', methods=['POST'])
 def ask():
     """
@@ -24,7 +22,6 @@ def ask():
 
     print(f"Received query from frontend: '{user_query}'")
 
-    # Module 1: Retrieve context
     vertex_ai_caller = VertexAICaller()
     contexts = vertex_ai_caller.run_vertex_ai_search(user_query)
 
