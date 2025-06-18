@@ -1,7 +1,7 @@
 import os
 from flask import Flask, request, jsonify
-from .gemini_gen_module import GeminiCaller
-from .vertex_rag_module import VertexAICaller
+from gemini_gen_module import GeminiCaller
+from vertex_rag_module import VertexAICaller
 
 app = Flask(__name__)
 
