@@ -1,5 +1,5 @@
 import os
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, Response
 from gemini_gen_module import GeminiCaller
 from vertex_rag_module import VertexAICaller
 
@@ -25,7 +25,15 @@ def handle_query():
 
     vertex_ai_caller = VertexAICaller()
     contexts = vertex_ai_caller.run_vertex_ai_search(user_query)
-    return jsonify(contexts)
+    print("DEBUG: Returning pickled SearchResponse to frontend.", flush=True)
+    if isinstance(contexts, bytes): # Check if it's indeed pickled bytes
+        print("DEBUG: Returning pickled SearchResponse to frontend.", flush=True)
+        # Send as raw binary data, setting appropriate content type
+        return Response(contexts, mimetype='application/octet-stream')
+    else:
+        # Fallback if something went wrong and it's not bytes (e.g., error from run_vertex_ai_search)
+        print("ERROR: Expected pickled response but got something else.", flush=True)
+        return jsonify({"error": "Failed to retrieve raw debug response."}), 500
 
     gemini_caller = GeminiCaller()
     if not contexts:

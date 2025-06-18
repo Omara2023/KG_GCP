@@ -3,6 +3,7 @@ import vertexai
 from typing import List, Dict
 from google.api_core.client_options import ClientOptions
 from google.cloud import discoveryengine_v1 as discoveryengine
+import pickle
 
 PROJECT_ID = os.environ.get("GCP_PROJECT_ID", "your-gcp-project-id") #project_id: Your Google Cloud project ID.
 LOCATION = os.environ.get("GCP_LOCATION", "global") #location: The region of your search engine.
@@ -67,7 +68,7 @@ class VertexAICaller:
             # page_result here is the TOP-LEVEL SearchResponse object
             response = client.search(request=request)
             print("Sucessfully done vertex search!")
-            return response
+            return pickle.dumps(response)
 
             # 1. Process the overall summary first (if it exists)
             if response.summary and response.summary.summary_text:
