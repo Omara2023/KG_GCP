@@ -34,8 +34,7 @@ def handle_query():
 
     gemini_caller = GeminiCaller()
     if not contexts:
-        # If no context is found, you can still try to answer or inform the user
-        print("No relevant contexts found from Vertex AI Search. Attempting to answer without grounding.")
+        main_file_logger.info("No relevant contexts found from Vertex AI Search. Attempting to answer without grounding.")
         final_response = gemini_caller.generate_response(user_query, [])
     else:
         final_response = gemini_caller.generate_response(user_query, contexts)

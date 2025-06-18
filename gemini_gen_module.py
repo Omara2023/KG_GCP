@@ -1,6 +1,8 @@
+import logging
 from typing import List, Dict, Any
 from vertexai.generative_models import GenerativeModel
 
+logger = logging.getLogger(__name__)
 GEMINI_MODEL_NAME = "gemini-1.5-flash-001"
 
 class GeminiCaller:
@@ -32,7 +34,7 @@ class GeminiCaller:
         model = GenerativeModel(self.model_name)
 
         full_prompt = self.construct_prompt(user_query, contexts)
-        print(f"Full prompt sent to Gemini:\n{full_prompt[:500]}...")
+        logger.info(f"Full prompt sent to Gemini:\n{full_prompt[:500]}...")
 
         try:
             response = model.generate_content(
@@ -41,7 +43,7 @@ class GeminiCaller:
             )
             generated_text = response.text
         except Exception as e:
-            print(f"Error during Gemini generation: {e}")
+            logger.exception(f"Error during Gemini generation: {e}")
             generated_text = "I apologize, but I encountered an error while generating a response."
             unique_citations = set() 
 
