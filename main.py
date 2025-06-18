@@ -26,10 +26,6 @@ def handle_query():
     vertex_ai_caller = VertexAICaller()
     contexts = vertex_ai_caller.run_vertex_ai_search(user_query)
     
-    print(contexts)
-    print(dir(contexts))
-    return jsonify({}), 200
-
     gemini_caller = GeminiCaller()
     if not contexts:
         # If no context is found, you can still try to answer or inform the user

@@ -4,9 +4,9 @@ from typing import List, Dict
 from google.api_core.client_options import ClientOptions
 from google.cloud import discoveryengine_v1 as discoveryengine
 
-PROJECT_ID = os.environ.get("GCP_PROJECT_ID", "your-gcp-project-id") #project_id: Your Google Cloud project ID.
-LOCATION = os.environ.get("GCP_LOCATION", "global") #location: The region of your search engine.
-ENGINE_ID = os.environ.get("GCP_ENGINE_ID") #engine_id: The ID of your Vertex AI Search app (engine).         
+PROJECT_ID = os.environ.get("GCP_PROJECT_ID") # Your Google Cloud project ID.
+LOCATION = os.environ.get("GCP_LOCATION") # The region of your search engine.
+ENGINE_ID = os.environ.get("GCP_ENGINE_ID") # The ID of your Vertex AI Search app (engine).         
             
 class VertexAICaller:
     """Wrapper class that calls Vertex AI Search app to retrieve relevant context."""
@@ -66,37 +66,39 @@ class VertexAICaller:
         try:
             # page_result here is the TOP-LEVEL SearchResponse object
             response = client.search(request=request)
-            print("Sucessfully done vertex search!")
-            return response
-
+            
             # 1. Process the overall summary first (if it exists)
-            if response.summary and response.summary.summary_text:
-                summary_text = response.summary.summary_text
+            first_response = response._response  # Access the first page response directly
+
+            if first_response.summary and first_response.summary.summary_text:
+                summary_text = first_response.summary.summary_text
                 citations = []
-                if response.summary.citation_metadata:
-                    for citation_source in response.summary.citation_metadata.citation_sources:
+                if first_response.summary.citation_metadata:
+                    for citation_source in first_response.summary.citation_metadata.citation_sources:
                         if citation_source.uri:
                             citations.append(citation_source.uri)
                 retrieved_contexts.append({
                     "content": summary_text,
                     "citations": citations,
-                    "type": "summary" # Add type to distinguish summary from snippets
+                    "type": "summary"  # Add type to distinguish summary from snippets
                 })
-                print(f"DEBUG: Added overall summary to contexts.")
+                print("DEBUG: Added overall summary to contexts.")
             else:
                 print("DEBUG: No overall summary found in response.")
 
-
-            # 2. Iterate through individual search results for snippets
-            for search_result_item in response.results: # <-- Iterate over .results
-                # Each search_result_item is a discoveryengine.SearchResponse.SearchResult
+            # 2. Iterate through all SearchResult items across pages
+            for search_result_item in response:
                 if search_result_item.snippet and search_result_item.snippet.snippet:
                     snippet_text = search_result_item.snippet.snippet
-                    source_url = search_result_item.document.uri if search_result_item.document and search_result_item.document.uri else "N/A"
+                    source_url = (
+                        search_result_item.document.uri
+                        if search_result_item.document and search_result_item.document.uri
+                        else "N/A"
+                    )
                     retrieved_contexts.append({
                         "content": snippet_text,
                         "citations": [source_url] if source_url != "N/A" else [],
-                        "type": "snippet" # Add type to distinguish snippets from summary
+                        "type": "snippet"  # Add type to distinguish snippets from summary
                     })
                     print(f"DEBUG: Added snippet from {source_url} to contexts.")
                 else:
