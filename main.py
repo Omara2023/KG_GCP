@@ -25,6 +25,7 @@ def handle_query():
 
     vertex_ai_caller = VertexAICaller()
     contexts = vertex_ai_caller.run_vertex_ai_search(user_query)
+    return jsonify(contexts)
 
     gemini_caller = GeminiCaller()
     if not contexts:

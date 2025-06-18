@@ -66,6 +66,8 @@ class VertexAICaller:
         try:
             # page_result here is the TOP-LEVEL SearchResponse object
             response = client.search(request=request)
+            print("Sucessfully done vertex search!")
+            return response
 
             # 1. Process the overall summary first (if it exists)
             if response.summary and response.summary.summary_text:
