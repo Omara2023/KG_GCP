@@ -1,6 +1,7 @@
 import os
 import vertexai
 import logging
+import json
 from typing import List, Dict
 from google.api_core.client_options import ClientOptions
 from google.cloud import discoveryengine_v1 as discoveryengine
@@ -39,47 +40,13 @@ class VertexAICaller:
 
         retrieved_contexts = []
         try:
-            # page_result here is the TOP-LEVEL SearchResponse object
             response = client.search(request=request)
+            if (output := self._extract_and_format_summary(response)):
+                retrieved_contexts.append(output)
             
-            # 1. Process the overall summary first (if it exists)
-            first_response = response._response  # Access the first page response directly
-
-            if first_response.summary and first_response.summary.summary_text:
-                summary_text = first_response.summary.summary_text
-                citations = []
-                if first_response.summary.citation_metadata:
-                    for citation_source in first_response.summary.citation_metadata.citation_sources:
-                        if citation_source.uri:
-                            citations.append(citation_source.uri)
-                retrieved_contexts.append({
-                    "content": summary_text,
-                    "citations": citations,
-                    "type": "summary"  # Add type to distinguish summary from snippets
-                })
-                logger.debug("DEBUG: Added overall summary to contexts.")
-            else:
-                logger.debug("DEBUG: No overall summary found in response.")
-
-            # 2. Iterate through all SearchResult items across pages
-            for search_result_item in response:
-                if search_result_item.snippet and search_result_item.snippet.snippet:
-                    snippet_text = search_result_item.snippet.snippet
-                    source_url = (
-                        search_result_item.document.uri
-                        if search_result_item.document and search_result_item.document.uri
-                        else "N/A"
-                    )
-                    retrieved_contexts.append({
-                        "content": snippet_text,
-                        "citations": [source_url] if source_url != "N/A" else [],
-                        "type": "snippet"  # Add type to distinguish snippets from summary
-                    })
-                    logger.debug(f"DEBUG: Added snippet from {source_url} to contexts.")
-                else:
-                    logger.debug("DEBUG: No snippet found for a search result item.")
-
-
+            if (output := self._extract_snippets_and_format(response)):
+                retrieved_contexts.extend(output)
+                
         except Exception as e:
             logger.exception(f"Error during Vertex AI Search retrieval: {e}")
             # In a real app, you might want to return an error or empty context
@@ -120,3 +87,28 @@ class VertexAICaller:
             spell_correction_spec=discoveryengine.SearchRequest.SpellCorrectionSpec(mode=discoveryengine.SearchRequest.SpellCorrectionSpec.Mode.AUTO),
         )
         return output
+    
+    def _extract_and_format_summary(self, response) -> Dict[str, str]:
+        """Read summary from SearchPager and return cleaned summary."""
+        first_response = response._response
+        if first_response.summary and first_response.summary.summary_text:
+            logger.debug("Added overall summary to contexts.")
+            return {"type": "summary", "content": first_response.summary.summary_text}
+        else:
+            logger.debug("No overall summary found in response.")
+        
+    def _extract_snippets_and_format(self, response) -> List[Dict[str, str]]:
+        """Read snippets from Search Pager and return cleaned entries."""
+        output = list()
+        for result in response:
+            doc = result.document
+            if doc and doc.json_data:
+                try:
+                    data = json.loads(doc.json_data)
+                    text = data.get("content")
+                    if text:
+                      output.append({"type": "snippet", "content": text})
+                except json.JSONDecodeError:
+                    logger.warning("Malformed json_data in document.")
+        return output
+
