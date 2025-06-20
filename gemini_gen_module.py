@@ -37,11 +37,13 @@ class GeminiCaller:
                 full_prompt,
                 generation_config={"temperature": 0.2, "max_output_tokens": 1024}
             )
+
             generated_text = response.text
         except Exception as e:
             logger.exception(f"Error during Gemini generation: {e}")
             generated_text = "I apologize, but I encountered an error while generating a response."
 
+        logger.info(f"Length of generated output: {len(generated_text)}.")
         return {
             "answer": generated_text,
         }

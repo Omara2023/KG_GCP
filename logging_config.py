@@ -3,7 +3,7 @@ import logging
 def setup_logging():
     """Configures the root logger for the application."""
     logger = logging.getLogger()
-    logger.setLevel(logging.INFO)
+    logger.setLevel(logging.DEBUG)
 
     if not logger.handlers:
         formatter = logging.Formatter('%(name)s - %(levelname)s - %(message)s')
