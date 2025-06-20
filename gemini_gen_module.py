@@ -3,7 +3,8 @@ from typing import List, Dict, Any
 from vertexai.generative_models import GenerativeModel
 
 logger = logging.getLogger(__name__)
-GEMINI_MODEL_NAME = "gemini-1.5-flash-001"
+
+GEMINI_MODEL_NAME = "gemini-1.5-flash"
 
 class GeminiCaller:
     """Wrapper class to generate responses using Gemini 1.5 Flash, grounded by the retrieved contexts."""
@@ -18,11 +19,8 @@ class GeminiCaller:
             "\n\n--- Retrieved Contexts ---"
         ]
 
-        unique_citations = set()
         for i, context in enumerate(contexts):
             prompt_parts.append(f"\nContext {i+1}:\n{context['content']}")
-            for citation in context.get('citations', []):
-                unique_citations.add(citation)
         prompt_parts.append("\n-------------------------\n")
         prompt_parts.append(f"User's Question: {user_query}")
 
@@ -45,9 +43,7 @@ class GeminiCaller:
         except Exception as e:
             logger.exception(f"Error during Gemini generation: {e}")
             generated_text = "I apologize, but I encountered an error while generating a response."
-            unique_citations = set() 
 
         return {
             "answer": generated_text,
-            "citations": list(unique_citations)
         }
