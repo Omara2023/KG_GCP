@@ -1,5 +1,4 @@
 import os
-import vertexai
 import logging
 import json
 from typing import List, Dict
@@ -7,25 +6,14 @@ from google.api_core.client_options import ClientOptions
 from google.cloud import discoveryengine_v1 as discoveryengine
 
 logger = logging.getLogger(__name__)
-
-PROJECT_ID = os.environ.get("GCP_PROJECT_ID") # Your Google Cloud project ID.
-LOCATION = os.environ.get("GCP_LOCATION") # The region of your search engine.
-ENGINE_ID = os.environ.get("GCP_ENGINE_ID") # The ID of your Vertex AI Search app (engine).         
             
 class VertexAICaller:
     """Wrapper class that calls Vertex AI Search app to retrieve relevant context."""
 
-    def __init__(self, project_id: str = PROJECT_ID, location: str = LOCATION, engine_id: str = ENGINE_ID):
-        try:
-            vertexai.init(project=PROJECT_ID, location=LOCATION)
-        except Exception as e:
-            logger.error(f"Error initializing Vertex AI: {e}")
-        else:
-            logger.info(f"Vertex AI initialized for project {PROJECT_ID} in location {LOCATION}")
-        finally:
-            self.project_id = project_id
-            self.location = location
-            self.engine_id = engine_id
+    def __init__(self, project_id: str, location: str, engine_id: str):
+        self.project_id = project_id
+        self.location = location
+        self.engine_id = engine_id
 
     def run_vertex_ai_search(self, query: str) -> List[Dict[str, str]]:
         """Perform similarity search on Vertex AI search app, returing results."""
@@ -51,8 +39,9 @@ class VertexAICaller:
             logger.exception(f"Error during Vertex AI Search retrieval: {e}")
             # In a real app, you might want to return an error or empty context
         
-        logger.debug(f"DEBUG: Final retrieved contexts count: {len(retrieved_contexts)}")
-        return retrieved_contexts
+        finally:
+            logger.debug(f"DEBUG: Final retrieved contexts count: {len(retrieved_contexts)}")
+            return retrieved_contexts
     
     def _serving_config(self) -> str:
         """Return fully qualified serving config."""

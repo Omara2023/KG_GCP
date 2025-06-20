@@ -1,14 +1,27 @@
 import os
 import logging
+import vertexai
 from flask import Flask, request, jsonify
 from logging_config import setup_logging
 
+PROJECT_ID = os.environ.get("GCP_PROJECT_ID") # Your Google Cloud project ID.
+LOCATION = os.environ.get("GCP_LOCATION") # The region of your search engine.
+ENGINE_ID = os.environ.get("GCP_ENGINE_ID") # The ID of your Vertex AI Search app (engine).         
+
 app_logger = setup_logging()
-app = Flask(__name__)
 main_file_logger = logging.getLogger(__name__)
 
 from gemini_gen_module import GeminiCaller
 from vertex_rag_module import VertexAICaller
+
+try:
+    vertexai.init(project=PROJECT_ID, location=LOCATION)
+except Exception as e:
+    main_file_logger.error(f"Error initializing Vertex AI: {e}")
+else:
+    main_file_logger.info(f"Vertex AI initialized for project {PROJECT_ID} in location {LOCATION}")
+
+app = Flask(__name__)
 
 main_file_logger.info("Flask app starting up.")
 
@@ -29,7 +42,7 @@ def handle_query():
 
     main_file_logger.info(f"Received query from frontend: '{user_query}'")
 
-    vertex_ai_caller = VertexAICaller()
+    vertex_ai_caller = VertexAICaller(PROJECT_ID, LOCATION, ENGINE_ID)
     contexts = vertex_ai_caller.run_vertex_ai_search(user_query)
 
     gemini_caller = GeminiCaller()
