@@ -4,22 +4,26 @@ import vertexai
 from flask import Flask, request, jsonify
 from logging_config import setup_logging
 
-PROJECT_ID = os.environ.get("GCP_PROJECT_ID") # Your Google Cloud project ID.
-LOCATION = os.environ.get("GCP_LOCATION") # The region of your search engine.
-ENGINE_ID = os.environ.get("GCP_ENGINE_ID") # The ID of your Vertex AI Search app (engine).         
-
 app_logger = setup_logging()
 main_file_logger = logging.getLogger(__name__)
+
+# --- Configuration ---
+PROJECT_ID = os.environ.get("GCP_PROJECT_ID") # Your Google Cloud project ID.
+VERTEX_AI_SEARCH_LOCATION  = os.environ.get("GCP_VERTEX_LOCATION") # The region of Vertex AI search engine.
+GEMINI_LLM_LOCATION  = os.environ.get("GCP_GEMINI_LOCATION") # Regional Gemini service to call.
+GEMINI_MODEL_NAME = "gemini-1.5-flash"
+ENGINE_ID = os.environ.get("GCP_ENGINE_ID") # The ID of your Vertex AI Search app (engine).         
 
 from gemini_gen_module import GeminiCaller
 from vertex_rag_module import VertexAICaller
 
+main_file_logger.info(f"Initializing Vertex AI for Generative Models with Project ID: {PROJECT_ID}, Location: {GEMINI_LLM_LOCATION}")
 try:
-    vertexai.init(project=PROJECT_ID, location=LOCATION)
+    vertexai.init(project=PROJECT_ID, location=GEMINI_LLM_LOCATION)
+    main_file_logger.info(f"Vertex AI initialized for Generative Models.")
 except Exception as e:
-    main_file_logger.error(f"Error initializing Vertex AI: {e}")
-else:
-    main_file_logger.info(f"Vertex AI initialized for project {PROJECT_ID} in location {LOCATION}")
+    main_file_logger.error(f"Failed to initialize Vertex AI for Generative Models: {e}. Exiting.")
+    exit(1)
 
 app = Flask(__name__)
 
@@ -42,10 +46,10 @@ def handle_query():
 
     main_file_logger.info(f"Received query from frontend: '{user_query}'")
 
-    vertex_ai_caller = VertexAICaller(PROJECT_ID, LOCATION, ENGINE_ID)
+    vertex_ai_caller = VertexAICaller(PROJECT_ID, VERTEX_AI_SEARCH_LOCATION, ENGINE_ID)
     contexts = vertex_ai_caller.run_vertex_ai_search(user_query)
 
-    gemini_caller = GeminiCaller()
+    gemini_caller = GeminiCaller(GEMINI_MODEL_NAME)
     if not contexts:
         main_file_logger.info("No relevant contexts found from Vertex AI Search. Attempting to answer without grounding.")
         final_response = gemini_caller.generate_response(user_query, [])

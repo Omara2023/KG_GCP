@@ -4,12 +4,10 @@ from vertexai.generative_models import GenerativeModel
 
 logger = logging.getLogger(__name__)
 
-GEMINI_MODEL_NAME = "gemini-1.5-flash"
-
 class GeminiCaller:
     """Wrapper class to generate responses using Gemini 1.5 Flash, grounded by the retrieved contexts."""
 
-    def __init__(self, model_name = GEMINI_MODEL_NAME):
+    def __init__(self, model_name):
         self.model_name = model_name
 
     def construct_prompt(self, user_query: str, contexts: List[Dict[str, Any]]) -> str:
