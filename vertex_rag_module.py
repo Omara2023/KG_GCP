@@ -36,10 +36,10 @@ class VertexAICaller:
                 
         except Exception as e:
             logger.exception(f"Error during Vertex AI Search retrieval: {e}")
-            # In a real app, you might want to return an error or empty context
+            exit(1)
         
         finally:
-            logger.debug(f"DEBUG: Final retrieved contexts count: {len(retrieved_contexts)}")
+            logger.info(f"Final retrieved contexts count: {len(retrieved_contexts)}")
             return retrieved_contexts
     
     def _serving_config(self) -> str:
@@ -80,14 +80,15 @@ class VertexAICaller:
         """Read summary from SearchPager and return cleaned summary."""
         first_response = response._response
         if first_response.summary and first_response.summary.summary_text:
-            logger.debug("Added overall summary to contexts.")
+            logger.info("Added overall summary to contexts.")
             return {"type": "summary", "content": first_response.summary.summary_text}
         else:
-            logger.debug("No overall summary found in response.")
+            logger.info("No overall summary found in response.")
         
     def _extract_snippets_and_format(self, response) -> List[Dict[str, str]]:
         """Read snippets from Search Pager and return cleaned entries."""
         output = list()
+        snippets_added = False
         for result in response:
             doc = result.document
             if doc and doc.json_data:
@@ -95,8 +96,10 @@ class VertexAICaller:
                     data = json.loads(doc.json_data)
                     text = data.get("content")
                     if text:
-                      output.append({"type": "snippet", "content": text})
+                        output.append({"type": "snippet", "content": text})
+                        snippets_added = True
                 except json.JSONDecodeError:
                     logger.warning("Malformed json_data in document.")
+        logger.info("Added snippets to contexts." if snippets_added else "No snippets added.")
         return output
 

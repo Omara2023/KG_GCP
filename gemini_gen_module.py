@@ -44,6 +44,4 @@ class GeminiCaller:
             generated_text = "I apologize, but I encountered an error while generating a response."
 
         logger.info(f"Length of generated output: {len(generated_text)}.")
-        return {
-            "answer": generated_text,
-        }
+        return {"response": generated_text,}
