@@ -100,7 +100,7 @@ class VertexAICaller:
 
             if "snippets" in derived and isinstance(derived["snippets"], list):
                 for item in derived["snippets"]:
-                    logger.info(item)
+                    logger.info(dict(item.items()))
                     logger.info("Type of item: " + str(type(item)))
                     if isinstance(item, dict) and "snippet" in item:
                         t = item["snippet"]
