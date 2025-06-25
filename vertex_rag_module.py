@@ -87,27 +87,26 @@ class VertexAICaller:
         
     def _extract_snippets_and_format(self, response) -> List[Dict[str, str]]:
         """Read snippets from Search Pager and return cleaned entries."""
-        output = list()
+        output = []
         snippets_added = False
-        logger.info(f"Number of snippets: {len(response.results)}")
+
         for result in response:
-            doc = result.document.content if result.document else "None"
-            chunk = result.chunk.content if result.chunk else "None"
-
-            logger.info("From line 1: " + str(doc))
-            logger.info("From line 2: " + str(chunk))
-
             doc = result.document
-            logger.info("doc.json_data " + ("is not None" if doc.json_data else "is None."))
-            if doc and doc.json_data:
-                try:
-                    data = json.loads(doc.json_data)
-                    text = data.get("content")
-                    if text:
-                        output.append({"type": "snippet", "content": text})
+            if not doc:
+                continue
+
+            derived_fields = doc.derived_struct_data.fields
+
+            # Common field names for extracted text from PDFs
+            for key in ("snippets", "content", "text"):
+                if key in derived_fields and derived_fields[key].WhichOneof("kind") == "string_value":
+                    logger.info(f"Using key: {key}")
+                    snippet = derived_fields[key].string_value
+                    if snippet:
+                        output.append({"type": "snippet", "content": snippet})
                         snippets_added = True
-                except json.JSONDecodeError:
-                    logger.warning("Malformed json_data in document.")
+                        break
+
         logger.info("Added snippets to contexts." if snippets_added else "No snippets added.")
         return output
 
