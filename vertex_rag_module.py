@@ -96,7 +96,7 @@ class VertexAICaller:
 
             derived_fields = doc.derived_struct_data
             logger.info("Fields in derived_struct_data:")
-            for k, v in doc.derived_struct_data.fields.items():
+            for k, v in doc.derived_struct_data.items():
                 logger.info(f"{k}: {v}")
 
             # Common field names for extracted text from PDFs
