@@ -90,15 +90,14 @@ class VertexAICaller:
         output = list()
         snippets_added = False
         for result in response:
-            logger.info(result.document.content)
-            logger.info(result.document.json_data)
-            logger.info(result.chunk.content)
+            logger.info("From line 1:" + str(result.document.content))
+            logger.info("From line 2: " + str(result.chunk.content))
             logger.info(type(result))
             logger.info(type(result.document))
             logger.info(dir(result))
             logger.info(dir(result.document))
-            continue
             doc = result.document
+            logger.info("doc.json " + "is not None" if doc.json_data else "is None.")
             if doc and doc.json_data:
                 try:
                     data = json.loads(doc.json_data)
