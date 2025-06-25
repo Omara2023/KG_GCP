@@ -95,12 +95,13 @@ class VertexAICaller:
                 continue
 
             derived_fields = doc.derived_struct_data
-            logger.info(dir(derived_fields))
-            logger.info(dict(derived_fields))
             derived = dict(derived_fields)
+            logger.info(dict(derived))
 
             if "snippets" in derived and isinstance(derived["snippets"], list):
                 for item in derived["snippets"]:
+                    logger.info(item)
+                    logger.info("Type of item: " + str(type(item)))
                     if isinstance(item, dict) and "snippet" in item:
                         t = item["snippet"]
                         if t and isinstance(t, str):
