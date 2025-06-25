@@ -95,19 +95,21 @@ class VertexAICaller:
                 continue
 
             derived_fields = doc.derived_struct_data
+            logger.info(dir(derived_fields))
+            logger.info(dict(derived_fields))
+            derived = dict(derived_fields)
 
-            if "snippets" in derived_fields:
-                snippets_field = derived_fields["snippets"]
-
-                if hasattr(snippets_field, "list_value"):
-                    for item in snippets_field.list_value.values:
-                        if item.HasField("struct_value"):
-                            fields = item.struct_value.fields
-                            if "snippet" in fields:
-                                snippet_text = fields["snippet"].string_value
-                                if snippet_text:
-                                    snippets_added = True
-                                    output.append({"type": "snippet", "content": snippet_text})
+            if "snippets" in derived and isinstance(derived["snippets"], list):
+                for item in derived["snippets"]:
+                    if isinstance(item, dict) and "snippet" in item:
+                        t = item["snippet"]
+                        if t and isinstance(t, str):
+                            snippets_added = True
+                            output.append({"type": "snippet", "content": t})
+            
+            elif "content" in derived and isinstance(derived["content"], str):
+                snippets_added = True
+                output.append({"type": "snippet", "content": derived["content"]})
 
         logger.info("Added snippets to contexts." if snippets_added else "No snippets added.")
         return output
