@@ -38,9 +38,8 @@ class VertexAICaller:
             logger.exception(f"Error during Vertex AI Search retrieval: {e}")
             exit(1)
         
-        finally:
-            logger.info(f"Final retrieved contexts count: {len(retrieved_contexts)}")
-            return retrieved_contexts
+        logger.info(f"Final retrieved contexts count: {len(retrieved_contexts)}")
+        return retrieved_contexts
     
     def _serving_config(self) -> str:
         """Return fully qualified serving config."""
@@ -95,7 +94,10 @@ class VertexAICaller:
             if not doc:
                 continue
 
-            derived_fields = doc.derived_struct_data.fields
+            derived_fields = doc.derived_struct_data
+            logger.info("Fields in derived_struct_data:")
+            for k, v in doc.derived_struct_data.fields.items():
+                logger.info(f"{k}: {v}")
 
             # Common field names for extracted text from PDFs
             for key in ("snippets", "content", "text"):
