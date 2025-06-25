@@ -108,18 +108,6 @@ class VertexAICaller:
                                 if snippet_text:
                                     snippets_added = True
                                     output.append({"type": "snippet", "content": snippet_text})
-                else:
-                    if snippets_field.WhichOneof("kind") == "string_value":
-                        snippet_text = snippets_field.string_value
-                        if snippet_text:
-                            snippets_added = True
-                            output.append({"type": "snippet", "content": snippet_text})
-
-            elif "content" in derived_fields:
-                content_field = derived_fields["content"]
-                if content_field.WhichOneof("kind") == "string_value":
-                    snippets_added = True
-                    output.append({"type": "snippet", "content": content_field.string_value})
 
         logger.info("Added snippets to contexts." if snippets_added else "No snippets added.")
         return output
