@@ -91,6 +91,7 @@ class VertexAICaller:
         snippets_added = False
         for result in response:
             logger.info(result.document.content)
+            logger.info(json.loads(result.document.json_data))
             logger.info(result.chunk.content)
             logger.info(type(result))
             logger.info(type(result.document))
