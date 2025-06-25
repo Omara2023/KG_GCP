@@ -90,7 +90,11 @@ class VertexAICaller:
         output = list()
         snippets_added = False
         for result in response:
-            logger.info(response.document.content)
+            logger.info(result.document.content)
+            logger.info(type(result))
+            logger.info(type(result.document))
+            logger.info(dir(result))
+            logger.info(dir(result.document))
             continue
             doc = result.document
             if doc and doc.json_data:
