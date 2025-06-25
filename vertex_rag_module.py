@@ -96,7 +96,6 @@ class VertexAICaller:
 
             derived_fields = doc.derived_struct_data
             derived = dict(derived_fields)
-            logger.info(dict(derived))
 
             if "snippets" in derived:
                 snippets = derived.get("snippets", [])

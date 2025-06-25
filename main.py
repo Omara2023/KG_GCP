@@ -49,6 +49,10 @@ def handle_query():
     vertex_ai_caller = VertexAICaller(PROJECT_ID, VERTEX_AI_SEARCH_LOCATION, ENGINE_ID)
     contexts = vertex_ai_caller.run_vertex_ai_search(user_query)
 
+    main_file_logger.info("Retrieved context from vertex search.")
+    for context in contexts:
+        main_file_logger.info(f"{context["type"]}: {context["content"]}")
+
     gemini_caller = GeminiCaller(GEMINI_MODEL_NAME)
     if not contexts:
         main_file_logger.info("No relevant contexts found from Vertex AI Search. Attempting to answer without grounding.")
