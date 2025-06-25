@@ -101,10 +101,9 @@ class VertexAICaller:
             if "snippets" in derived:
                 snippets = derived.get("snippets", [])
                 for item in snippets:
-                    logger.info(dict(item.items()))
-                    logger.info("Type of item: " + str(type(item)))
-                    if isinstance(item, dict) and "snippet" in item:
-                        t = item["snippet"]
+                    item_dict = dict(item.items())
+                    if "snippet" in item_dict:
+                        t = item_dict["snippet"]
                         if t and isinstance(t, str):
                             snippets_added = True
                             output.append({"type": "snippet", "content": t})
