@@ -95,20 +95,33 @@ class VertexAICaller:
                 continue
 
             derived_fields = doc.derived_struct_data
-            logger.info("Fields in derived_struct_data:")
-            for k, v in doc.derived_struct_data.items():
-                logger.info(f"{k}: {v}")
 
-            # Common field names for extracted text from PDFs
-            for key in ("snippets", "content", "text"):
-                if key in derived_fields and derived_fields[key].WhichOneof("kind") == "string_value":
-                    logger.info(f"Using key: {key}")
-                    snippet = derived_fields[key].string_value
-                    if snippet:
-                        output.append({"type": "snippet", "content": snippet})
-                        snippets_added = True
-                        break
+            if "snippets" in derived_fields:
+                snippets_field = derived_fields["snippets"]
+
+                if hasattr(snippets_field, "list_value"):
+                    for item in snippets_field.list_value.values:
+                        if item.HasField("struct_value"):
+                            fields = item.struct_value.fields
+                            if "snippet" in fields:
+                                snippet_text = fields["snippet"].string_value
+                                if snippet_text:
+                                    snippets_added = True
+                                    output.append({"type": "snippet", "content": snippet_text})
+                else:
+                    if snippets_field.WhichOneof("kind") == "string_value":
+                        snippet_text = snippets_field.string_value
+                        if snippet_text:
+                            snippets_added = True
+                            output.append({"type": "snippet", "content": snippet_text})
+
+            elif "content" in derived_fields:
+                content_field = derived_fields["content"]
+                if content_field.WhichOneof("kind") == "string_value":
+                    snippets_added = True
+                    output.append({"type": "snippet", "content": content_field.string_value})
 
         logger.info("Added snippets to contexts." if snippets_added else "No snippets added.")
         return output
+
 
