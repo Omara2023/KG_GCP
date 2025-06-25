@@ -89,12 +89,13 @@ class VertexAICaller:
         """Read snippets from Search Pager and return cleaned entries."""
         output = list()
         snippets_added = False
+        logger.info(f"Number of snippets: {len(response.results)}")
         for result in response:
-            doc_content = result.document.content if result.document and result.document.content else "None"
-            chunk_content = result.chunk.content if result.chunk and result.chunk.content else "None"
+            doc = result.document.content if result.document else "None"
+            chunk = result.chunk.content if result.chunk else "None"
 
-            logger.info("From line 1: " + str(doc_content))
-            logger.info("From line 2: " + str(chunk_content))
+            logger.info("From line 1: " + str(doc))
+            logger.info("From line 2: " + str(chunk))
 
             doc = result.document
             logger.info("doc.json_data " + ("is not None" if doc.json_data else "is None."))
