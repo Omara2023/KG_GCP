@@ -30,7 +30,12 @@ class GeminiCaller:
         model = GenerativeModel(self.model_name)
 
         full_prompt = self.construct_prompt(user_query, contexts)
-        logger.info(f"Full prompt sent to Gemini is of length:\n{len(full_prompt)}...")
+        logger.info(f"Full prompt sent to Gemini is of length: {len(full_prompt)}...")
+        logger.info(f"Actual prompt: {len(full_prompt)}...")
+
+        CHUNK_SIZE = 150
+        for i in range(0, len(full_prompt), CHUNK_SIZE):
+            logger.info(f"{full_prompt[i: i+CHUNK_SIZE]}...")
 
         try:
             response = model.generate_content(
