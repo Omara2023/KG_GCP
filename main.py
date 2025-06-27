@@ -60,7 +60,6 @@ def handle_query():
     else:
         final_response = gemini_caller.generate_response(user_query, contexts)
 
-    main_file_logger.info(f"Final response: {final_response}")
     return jsonify(final_response)
 
 if __name__ == '__main__':
