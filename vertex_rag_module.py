@@ -1,5 +1,4 @@
 import logging
-import json
 from typing import List, Dict
 from google.api_core.client_options import ClientOptions
 from google.cloud import discoveryengine_v1 as discoveryengine
@@ -52,7 +51,7 @@ class VertexAICaller:
         output = discoveryengine.SearchRequest.ContentSearchSpec(
             snippet_spec=discoveryengine.SearchRequest.ContentSearchSpec.SnippetSpec(return_snippet=True),
             summary_spec=discoveryengine.SearchRequest.ContentSearchSpec.SummarySpec(
-                summary_result_count=5,  
+                summary_result_count=3,  
                 include_citations=True,
                 ignore_adversarial_query=True,
                 ignore_non_summary_seeking_query=True,
@@ -85,7 +84,6 @@ class VertexAICaller:
     def _extract_snippets_and_format(self, response) -> List[Dict[str, str]]:
         """Read snippets from Search Pager and return cleaned entries."""
         output = []
-        snippets_added = False
 
         for result in response:
             doc = result.document
@@ -101,15 +99,10 @@ class VertexAICaller:
                     item_dict = dict(item.items())
                     if "snippet" in item_dict:
                         t = item_dict["snippet"]
-                        if t and isinstance(t, str):
-                            snippets_added = True
+                        if t:
                             output.append({"type": "snippet", "content": t})
-            
-            # elif "content" in derived and isinstance(derived["content"], str):
-            #     snippets_added = True
-            #     output.append({"type": "snippet", "content": derived["content"]})
-
-        logger.info("Added snippets to contexts." if snippets_added else "No snippets added.")
+        
+        logger.info(f"Added {(num := len(output))} snippet{"s" if num > 1 else ""} to contexts.")
         return output
 
 

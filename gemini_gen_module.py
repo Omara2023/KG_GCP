@@ -13,7 +13,7 @@ class GeminiCaller:
     def construct_prompt(self, user_query: str, contexts: List[Dict[str, Any]]) -> str:
         """String together user query and context into a LLM-ready prompt."""
         prompt_parts = [
-            f"Based on the following information, answer the user's question. If the information does not contain the answer, state that you cannot answer based on the provided context. Do not make up information.",
+            f"Answer the user's question, grounding your answer in the provided context. Do not make up information. If the provided context lacks the answer, state so before answering.",
             "\n\n--- Retrieved Contexts ---"
         ]
 
@@ -30,12 +30,12 @@ class GeminiCaller:
         model = GenerativeModel(self.model_name)
 
         full_prompt = self.construct_prompt(user_query, contexts)
-        logger.info(f"Full prompt sent to Gemini is of length: {len(full_prompt)}...")
+        logger.info(f"Gemini prompt length: {len(full_prompt)}...")
 
         try:
             response = model.generate_content(
                 full_prompt,
-                generation_config={"temperature": 0.2, "max_output_tokens": 1024*2}
+                generation_config={"temperature": 0.4, "max_output_tokens": 1024}
             )
 
             generated_text = response.text
@@ -43,5 +43,5 @@ class GeminiCaller:
             logger.exception(f"Error during Gemini generation: {e}")
             generated_text = "I apologize, but I encountered an error while generating a response."
 
-        logger.info(f"Length of generated output: {len(generated_text)}.")
+        logger.info(f"Generated output length: {len(generated_text)}.")
         return {"response": generated_text,}
