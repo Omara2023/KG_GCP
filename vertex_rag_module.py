@@ -35,7 +35,6 @@ class VertexAICaller:
             logger.exception(f"Error during Vertex AI Search retrieval: {e}")
             exit(1)
         
-        logger.info(f"Final retrieved contexts count: {len(retrieved_contexts)}")
         return retrieved_contexts
     
     def _serving_config(self) -> str:

@@ -7,15 +7,16 @@ from logging_config import setup_logging
 app_logger = setup_logging()
 main_file_logger = logging.getLogger(__name__)
 
-# --- Configuration ---
-PROJECT_ID = os.environ.get("GCP_PROJECT_ID") # Your Google Cloud project ID.
-VERTEX_AI_SEARCH_LOCATION  = os.environ.get("GCP_VERTEX_LOCATION") # The region of Vertex AI search engine.
-GEMINI_LLM_LOCATION  = os.environ.get("GCP_GEMINI_LOCATION") # Regional Gemini service to call.
-GEMINI_MODEL_NAME = "gemini-1.5-flash"
-ENGINE_ID = os.environ.get("GCP_ENGINE_ID") # The ID of your Vertex AI Search app (engine).         
-
 from gemini_gen_module import GeminiCaller
 from vertex_rag_module import VertexAICaller
+
+# --- Configuration ---
+PROJECT_ID = os.environ.get("GCP_PROJECT_ID")
+VERTEX_AI_SEARCH_LOCATION  = os.environ.get("GCP_VERTEX_LOCATION")
+GEMINI_LLM_LOCATION  = os.environ.get("GCP_GEMINI_LOCATION") 
+ENGINE_ID = os.environ.get("GCP_ENGINE_ID")   
+GEMINI_MODEL_NAME = "gemini-1.5-flash"
+
 
 main_file_logger.info(f"Initializing Vertex AI for Generative Models with Project ID: {PROJECT_ID}, Location: {GEMINI_LLM_LOCATION}")
 try:
@@ -26,8 +27,6 @@ except Exception as e:
     exit(1)
 
 app = Flask(__name__)
-
-main_file_logger.info("Flask app starting up.")
 
 @app.route('/query', methods=['POST'])
 def handle_query():
@@ -44,15 +43,11 @@ def handle_query():
         main_file_logger.info("No user query included.")
         return jsonify({"error": "Missing 'query' in request"}), 400
 
-    main_file_logger.info(f"Received query from frontend: '{user_query}'")
+    main_file_logger.info(f"User query: '{user_query}'")
 
     vertex_ai_caller = VertexAICaller(PROJECT_ID, VERTEX_AI_SEARCH_LOCATION, ENGINE_ID)
     contexts = vertex_ai_caller.run_vertex_ai_search(user_query)
-
-    main_file_logger.info("Retrieved context from vertex search.")
-    for context in contexts:
-        main_file_logger.info(f"{context["type"]}: {context["content"]}")
-
+  
     gemini_caller = GeminiCaller(GEMINI_MODEL_NAME)
     if not contexts:
         main_file_logger.info("No relevant contexts found from Vertex AI Search. Attempting to answer without grounding.")
