@@ -105,9 +105,9 @@ class VertexAICaller:
                             snippets_added = True
                             output.append({"type": "snippet", "content": t})
             
-            elif "content" in derived and isinstance(derived["content"], str):
-                snippets_added = True
-                output.append({"type": "snippet", "content": derived["content"]})
+            # elif "content" in derived and isinstance(derived["content"], str):
+            #     snippets_added = True
+            #     output.append({"type": "snippet", "content": derived["content"]})
 
         logger.info("Added snippets to contexts." if snippets_added else "No snippets added.")
         return output
