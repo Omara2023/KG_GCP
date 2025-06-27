@@ -15,9 +15,7 @@ class VertexAICaller:
         self.engine_id = engine_id
 
     def run_vertex_ai_search(self, query: str) -> List[Dict[str, str]]:
-        """Perform similarity search on Vertex AI search app, returing results."""
-        logger.info(f"Attempting to retrieve context for query: '{query}'")
-        
+        """Perform similarity search on Vertex AI search app, returing results."""        
         client_options = (ClientOptions(api_endpoint=f"{self.location}-discoveryengine.googleapis.com") if self.location != "global" else None)
         client = discoveryengine.SearchServiceClient(client_options=client_options)
 
@@ -54,7 +52,7 @@ class VertexAICaller:
         output = discoveryengine.SearchRequest.ContentSearchSpec(
             snippet_spec=discoveryengine.SearchRequest.ContentSearchSpec.SnippetSpec(return_snippet=True),
             summary_spec=discoveryengine.SearchRequest.ContentSearchSpec.SummarySpec(
-                summary_result_count=3,  
+                summary_result_count=5,  
                 include_citations=True,
                 ignore_adversarial_query=True,
                 ignore_non_summary_seeking_query=True,
