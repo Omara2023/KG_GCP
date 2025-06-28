@@ -46,7 +46,7 @@ class GeminiCaller:
         return full_prompt
 
     def _generate_content_config(self) -> types.GenerateContentConfig:
-        return types.GenerateContentConfig({"temperature": 0.4, "max_output_tokens": 4000})
+        return types.GenerateContentConfig(temperature=0.4, max_output_tokens=4000)
 
 
    
