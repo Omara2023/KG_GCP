@@ -8,7 +8,7 @@ class GeminiService:
     def __init__(self):
         self.caller = GeminiCaller(
             os.environ.get("GCP_PROJECT_ID"),
-            os.environ.get("GCP_ENGINE_ID"),   
+            os.environ.get("GCP_GEMINI_LOCATION"),   
             "gemini-1.5-flash"
         )
 
