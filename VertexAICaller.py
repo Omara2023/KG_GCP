@@ -3,8 +3,6 @@ from typing import List, Dict
 from google.api_core.client_options import ClientOptions
 from google.cloud import discoveryengine_v1 as discoveryengine
 
-logger = logging.getLogger(__name__)
-            
 class VertexAICaller:
     """Wrapper class that calls Vertex AI Search app to retrieve relevant context."""
 
@@ -12,6 +10,7 @@ class VertexAICaller:
         self.project_id = project_id
         self.location = location
         self.engine_id = engine_id
+        self.logger = logging.getLogger(__name__)
 
     def run_vertex_ai_search(self, query: str) -> List[Dict[str, str]]:
         """Perform similarity search on Vertex AI search app, returing results."""        
@@ -32,7 +31,7 @@ class VertexAICaller:
                 retrieved_contexts.extend(output)
                 
         except Exception as e:
-            logger.exception(f"Error during Vertex AI Search retrieval: {e}")
+            self.logger.exception(f"Error during Vertex AI Search retrieval: {e}")
             exit(1)
         
         return retrieved_contexts
@@ -75,10 +74,10 @@ class VertexAICaller:
         """Read summary from SearchPager and return cleaned summary."""
         first_response = response._response
         if first_response.summary and first_response.summary.summary_text:
-            logger.info("Added overall summary to contexts.")
+            self.logger.info("Added overall summary to contexts.")
             return {"type": "summary", "content": first_response.summary.summary_text}
         else:
-            logger.info("No overall summary found in response.")
+            self.logger.info("No overall summary found in response.")
         
     def _extract_snippets_and_format(self, response) -> List[Dict[str, str]]:
         """Read snippets from Search Pager and return cleaned entries."""
@@ -101,7 +100,7 @@ class VertexAICaller:
                         if t:
                             output.append({"type": "snippet", "content": t})
         
-        logger.info(f"Added {(num := len(output))} snippet{"s" if num > 1 else ""} to contexts.")
+        self.logger.info(f"Added {(num := len(output))} snippet{"s" if num > 1 else ""} to contexts.")
         return output
 
 
