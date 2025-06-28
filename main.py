@@ -1,6 +1,5 @@
 import os
 import logging
-
 from flask import Flask, request, jsonify
 from logging_config import setup_logging
 from gemini_caller import GeminiCaller
@@ -9,7 +8,7 @@ from vertex_ai_caller import VertexAICaller
 app_logger = setup_logging()
 main_file_logger = logging.getLogger(__name__)
 
-# --- Configuration ---
+# --- Configuration --- #
 PROJECT_ID = os.environ.get("GCP_PROJECT_ID")
 VERTEX_AI_SEARCH_LOCATION  = os.environ.get("GCP_VERTEX_LOCATION")
 GEMINI_LLM_LOCATION  = os.environ.get("GCP_GEMINI_LOCATION") 
@@ -38,7 +37,7 @@ def handle_query():
     vertex_ai_caller = VertexAICaller(PROJECT_ID, VERTEX_AI_SEARCH_LOCATION, ENGINE_ID)
     contexts = vertex_ai_caller.run_vertex_ai_search(user_query)
   
-    gemini_caller = GeminiCaller(GEMINI_MODEL_NAME)
+    gemini_caller = GeminiCaller(PROJECT_ID, GEMINI_LLM_LOCATION, GEMINI_MODEL_NAME)
     if not contexts:
         main_file_logger.info("No relevant contexts found from Vertex AI Search. Attempting to answer without grounding.")
         final_response = gemini_caller.generate_response(user_query, [])

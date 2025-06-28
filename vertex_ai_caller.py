@@ -6,11 +6,11 @@ from google.cloud import discoveryengine_v1 as discoveryengine
 class VertexAICaller:
     """Wrapper class that calls Vertex AI Search app to retrieve relevant context."""
 
-    def __init__(self, project_id: str, location: str, engine_id: str):
+    def __init__(self, project_id: str, location: str, engine_id: str, logger: logging.Logger = None):
         self.project_id = project_id
         self.location = location
         self.engine_id = engine_id
-        self.logger = logging.getLogger(__name__)
+        self.logger = logger or logging.getLogger(__name__)
 
     def run_vertex_ai_search(self, query: str) -> List[Dict[str, str]]:
         """Perform similarity search on Vertex AI search app, returing results."""        
