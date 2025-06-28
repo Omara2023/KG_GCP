@@ -12,7 +12,7 @@ class GeminiService:
             "gemini-1.5-flash"
         )
 
-    def response(self, query: str, contexts: list):
+    def respond(self, query: str, contexts: list):
         if not contexts:
             logger.info("No relevant contexts found. Responding without grounding.")
             return self.caller.generate_response(query, [])

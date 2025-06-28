@@ -2,11 +2,6 @@ from flask import Flask
 from logging_config import setup_logging
 from routes.query import query_bp
 
-# --- Configuration --- #
-
-ENGINE_ID = os.environ.get("GCP_ENGINE_ID")   
-GEMINI_MODEL_NAME = "gemini-1.5-flash"
-
 def create_app():
     """Factory method to produce Flask App."""
     app_logger = setup_logging()
