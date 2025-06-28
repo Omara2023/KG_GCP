@@ -8,7 +8,6 @@ def create_app():
     app_logger = setup_logging()
     app = Flask(__name__)
     app.register_blueprint(query_bp)
-    
     return app
 
 app = create_app()

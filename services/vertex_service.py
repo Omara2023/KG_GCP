@@ -6,7 +6,7 @@ class VertexService:
         self.caller = VertexAICaller(
             os.environ.get("GCP_PROJECT_ID"),
             os.environ.get("GCP_VERTEX_LOCATION"),
-            os.environ.get("GCP_GEMINI_LOCATION") 
+            os.environ.get("GCP_ENGINE_ID") 
         )
 
     def search(self, query: str):
