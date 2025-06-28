@@ -1,3 +1,4 @@
+import os
 from flask import Flask
 from logging_config import setup_logging
 from routes.query import query_bp
@@ -10,8 +11,7 @@ def create_app():
     
     return app
 
+app = create_app()
+
 if __name__ == '__main__':
-    import os
-    app = create_app()
-    print("Starting Flask application...")
     app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))
