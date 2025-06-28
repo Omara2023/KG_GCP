@@ -1,14 +1,13 @@
 import os
 import logging
-import vertexai
+
 from flask import Flask, request, jsonify
 from logging_config import setup_logging
+from gemini_caller import GeminiCaller
+from vertex_ai_caller import VertexAICaller
 
 app_logger = setup_logging()
 main_file_logger = logging.getLogger(__name__)
-
-from gemini_gen_module import GeminiCaller
-from vertex_rag_module import VertexAICaller
 
 # --- Configuration ---
 PROJECT_ID = os.environ.get("GCP_PROJECT_ID")
@@ -16,15 +15,6 @@ VERTEX_AI_SEARCH_LOCATION  = os.environ.get("GCP_VERTEX_LOCATION")
 GEMINI_LLM_LOCATION  = os.environ.get("GCP_GEMINI_LOCATION") 
 ENGINE_ID = os.environ.get("GCP_ENGINE_ID")   
 GEMINI_MODEL_NAME = "gemini-1.5-flash"
-
-
-main_file_logger.info(f"Initializing Vertex AI for Generative Models with Project ID: {PROJECT_ID}, Location: {GEMINI_LLM_LOCATION}")
-try:
-    vertexai.init(project=PROJECT_ID, location=GEMINI_LLM_LOCATION)
-    main_file_logger.info(f"Vertex AI initialized for Generative Models.")
-except Exception as e:
-    main_file_logger.error(f"Failed to initialize Vertex AI for Generative Models: {e}. Exiting.")
-    exit(1)
 
 app = Flask(__name__)
 
