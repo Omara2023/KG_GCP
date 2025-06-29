@@ -31,22 +31,37 @@ class GeminiCaller:
         return {"response": generated_text}
 
     def _construct_prompt(self, user_query: str, contexts: List[Dict[str, Any]]) -> str:
-        """String together user query and context into a LLM-ready prompt."""
-        prompt_parts = [
-            f"Answer the user's question, grounding your answer in the provided context. Do not make up information. If the provided context lacks the answer, state so before answering.",
-            "\n\n--- Retrieved Contexts ---"
-        ]
+        """Builds the full prompt for Gemini, adapting based on context availability."""
+        if contexts:
+            return self._prompt_with_context(user_query, contexts)
+        else:
+            return self._prompt_without_context(user_query)
 
+    def _prompt_with_context(self, user_query: str, contexts: List[Dict[str, Any]]) -> str:
+        prompt_parts = ["\n\n--- Retrieved Contexts ---"]
         for i, context in enumerate(contexts):
             prompt_parts.append(f"\nContext {i+1}:\n{context['content']}")
         prompt_parts.append("\n-------------------------\n")
-        prompt_parts.append(f"User's Question: {user_query}")
+        prompt_parts.append("Using the above contexts, answer the following question as accurately as possible.")
+        prompt_parts.append(f"\n\nUser's Question: {user_query}")
+        return "\n".join(prompt_parts)
 
-        full_prompt = "\n".join(prompt_parts)
-        return full_prompt
+    def _prompt_without_context(self, user_query: str) -> str:
+        return (
+            "No external context is available for this query. Please answer using your own knowledge, "
+            "and clearly state that context was not provided.\n\n"
+            f"User's Question: {user_query}"
+        )
 
     def _generate_content_config(self) -> types.GenerateContentConfig:
-        return types.GenerateContentConfig(temperature=0.4, max_output_tokens=4000)
-
-
+        return types.GenerateContentConfig(
+            temperature=0.4,
+            max_output_tokens=4000,
+            system_instruction=[
+                "You are an expert assistant. Use the retrieved contexts provided to answer the user's question as faithfully as possible. "
+                "Do not invent facts or speculate. If the contexts contain relevant information, use them. "
+                "If the contexts do not include enough information to answer the question fully, you may rely on your own general knowledge to fill in the gaps, "
+                "but clearly indicate when this is the case. If the question cannot be answered with the context or your own knowledge, say so."
+            ]
+        )
    
