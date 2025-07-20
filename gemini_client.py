@@ -3,13 +3,13 @@ from typing import List, Dict, Any
 from google import genai
 from google.genai import types
 
-class GeminiCaller:
+class GeminiClient:
     """Wrapper class to generate responses using Gemini, grounded by the retrieved contexts."""
 
-    def __init__(self, project_id, location, model_name, logger: logging.Logger = None):
+    def __init__(self, project_id, location, model_name):
         self.client = genai.Client(vertexai=True, project=project_id, location=location)
         self.model_name = model_name
-        self.logger = logger or logging.getLogger(__name__)
+        self.logger = logging.getLogger(__name__)
 
     def generate_response(self, user_query: str, contexts: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Returns a dictionary with the generated answer and a list of all unique citations."""
