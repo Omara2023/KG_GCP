@@ -1,12 +1,12 @@
 import os
-from vertex_ai_caller import VertexAIRagCaller
+from vertex_ai_client import VertexAIRagClient
 
 class VertexRagService:
     def __init__(self):
         self.project_id = self._get_env("GCP_PROJECT_ID")
         self.location = self._get_env("GCP_VERTEX_LOCATION")
         self.rag_corpus_id = self._get_env("GCP_RAG_CORPUS_ID")
-        self.caller = VertexAIRagCaller(self.project_id, self.location, self.rag_corpus_id)       
+        self.caller = VertexAIRagClient(self.project_id, self.location, self.rag_corpus_id)       
 
     def _get_env(self, var_name: str) -> str:
         value = os.environ.get(var_name)
@@ -15,4 +15,4 @@ class VertexRagService:
         return value
 
     def search(self, query: str):
-        return self.caller.run_vertex_ai_search(query)
+        return self.caller.run_context_retrieval(query)
