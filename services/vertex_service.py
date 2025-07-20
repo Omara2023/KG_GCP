@@ -1,13 +1,18 @@
 import os
-from vertex_ai_caller import VertexAICaller
+from vertex_ai_caller import VertexAIRagCaller
 
-class VertexService:
+class VertexRagService:
     def __init__(self):
-        self.caller = VertexAICaller(
-            os.environ.get("GCP_PROJECT_ID"),
-            os.environ.get("GCP_VERTEX_LOCATION"),
-            os.environ.get("GCP_ENGINE_ID") 
-        )
+        self.project_id = self._get_env("GCP_PROJECT_ID")
+        self.location = self._get_env("GCP_VERTEX_LOCATION")
+        self.rag_corpus_id = self._get_env("GCP_RAG_CORPUS_ID")
+        self.caller = VertexAIRagCaller(self.project_id, self.location, self.rag_corpus_id)       
+
+    def _get_env(self, var_name: str) -> str:
+        value = os.environ.get(var_name)
+        if not value:
+            raise ValueError(f"Missing required environment variable: {var_name}")
+        return value
 
     def search(self, query: str):
         return self.caller.run_vertex_ai_search(query)
