@@ -32,7 +32,7 @@ class VertexAIRagClient:
                 rag_retrieval_config=rag_retrieval_config
             )
 
-            print(response)
+            self.logger.info(response)
             return True
                     
         except Exception as e:
