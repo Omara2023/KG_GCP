@@ -2,7 +2,7 @@ import logging
 import vertexai
 from vertexai import rag
 
-class VertexAIRagCaller:
+class VertexAIRagClient:
     """Wrapper class that calls Vertex AI RAG engine to retrieve context."""
 
     def __init__(self, project_id: str, location: str, rag_corpus_id: str):
@@ -32,7 +32,7 @@ class VertexAIRagCaller:
                 rag_retrieval_config=rag_retrieval_config
             )
 
-            print(response)
+            self.logger.info(response)
             return True
                     
         except Exception as e:
