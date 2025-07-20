@@ -3,14 +3,14 @@ from typing import List, Dict
 from google.api_core.client_options import ClientOptions
 from google.cloud import discoveryengine_v1 as discoveryengine
 
-class VertexAICaller:
-    """Wrapper class that calls Vertex AI Search app to retrieve relevant context."""
+class VertexAIRagCaller:
+    """Wrapper class that calls Vertex AI RAG engine to retrieve context."""
 
-    def __init__(self, project_id: str, location: str, engine_id: str, logger: logging.Logger = None):
+    def __init__(self, project_id: str, location: str, rag_corpus_id: str):
         self.project_id = project_id
         self.location = location
-        self.engine_id = engine_id
-        self.logger = logger or logging.getLogger(__name__)
+        self.rag_corpus_id = rag_corpus_id
+        self.logger = logging.getLogger(__name__)
 
     def run_vertex_ai_search(self, query: str) -> List[Dict[str, str]]:
         """Perform similarity search on Vertex AI search app, returing results."""        
@@ -36,13 +36,9 @@ class VertexAICaller:
         
         return retrieved_contexts
     
-    def _serving_config(self) -> str:
-        """Return fully qualified serving config."""
-        output = (
-            f"projects/{self.project_id}/locations/{self.location}/collections/default_collection/"
-            f"engines/{self.engine_id}/servingConfigs/default_config"
-        )
-        return output
+    def _rag_corpus_resoruce(self) -> str:
+        """Return fully qualified name of Rag corpus."""
+        return f"projects/{self.project_id}/locations/{self.location}/locations/ragCorpora/{self.rag_corpus_id}"
 
     def _prepare_content_search_spec(self) -> discoveryengine.SearchRequest.ContentSearchSpec:
         """Instantiate and resturn ContentSearchSpec Class."""
