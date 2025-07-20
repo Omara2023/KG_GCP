@@ -1,6 +1,6 @@
 import os 
 import logging
-from gemini_client import GeminiClient
+from clients.gemini_client import GeminiClient
 
 logger = logging.getLogger(__name__)
 
