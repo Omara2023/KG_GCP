@@ -14,7 +14,6 @@ class GeminiCaller:
     def generate_response(self, user_query: str, contexts: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Returns a dictionary with the generated answer and a list of all unique citations."""
         full_prompt = self._construct_prompt(user_query, contexts)
-        self.logger.info(f"Gemini prompt length: {len(full_prompt)}...")
 
         try:
             response = self.client.models.generate_content(
@@ -27,7 +26,6 @@ class GeminiCaller:
             self.logger.exception(f"Error during Gemini generation: {e}")
             generated_text = "I apologize, but I encountered an error while generating a response."
 
-        self.logger.info(f"Generated output length: {len(generated_text)}.")
         return {"response": generated_text}
 
     def _construct_prompt(self, user_query: str, contexts: List[Dict[str, Any]]) -> str:
