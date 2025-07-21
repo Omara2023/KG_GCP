@@ -7,7 +7,7 @@ logger = logging.getLogger(__name__)
 class GeminiService:
     def __init__(self):
         self.project_id = self._get_env("GCP_PROJECT_ID")
-        self.location = self._get_env("GCP_GEMINI_LOCATION")
+        self.location = self._get_env("GCP_GEMINI_REGION")
         self.client = GeminiClient(project_id=self.project_id, location=self.location, model_name="gemini-1.5-flash")
 
     def _get_env(self, var_name: str) -> str:

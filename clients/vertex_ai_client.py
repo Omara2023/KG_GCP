@@ -41,7 +41,7 @@ class VertexAIRagClient:
     
     def _rag_corpus_resoruce(self) -> str:
         """Return fully qualified name of Rag corpus."""
-        return f"projects/{self.project_id}/locations/{self.location}/locations/ragCorpora/{self.rag_corpus_id}"
+        return f"projects/{self.project_id}/locations/{self.location}/ragCorpora/{self.rag_corpus_id}"
 
     def _rag_retrieval_config(self) -> rag.RagRetrievalConfig:
         return rag.RagRetrievalConfig(top_k=3, filter=rag.Filter(vector_distance_threshold=0.5))
