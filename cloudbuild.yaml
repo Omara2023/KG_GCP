@@ -1,0 +1,16 @@
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'gcr.io/$PROJECT_ID/$_SERVICE_NAME', '.']
+
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        gcloud run deploy $_SERVICE_NAME \
+          --image=gcr.io/$PROJECT_ID/$_SERVICE_NAME \
+          --region=$_DEPLOY_REGION \
+          --platform=managed \
+          --quiet \
+          --clear-env-vars \
+          --set-env-vars=GCP_PROJECT_ID=$_AR_PROJECT_ID,GCP_RAG_CORPUS_REGION=$_RAG_CORPUS_REGION,GCP_RAG_CORPUS_ID=$_RAG_CORPUS_ID,GCP_GEMINI_REGION=$_GEMINI_REGION
