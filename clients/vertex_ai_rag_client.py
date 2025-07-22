@@ -1,6 +1,7 @@
 import logging
 import vertexai
 from vertexai import rag
+from typing
 
 class VertexAIRagClient:
     """Wrapper class that calls Vertex AI RAG engine to retrieve context."""
@@ -37,6 +38,8 @@ class VertexAIRagClient:
             self.logger.info("Dir of response object: ")
             self.logger.info(dir(response))
                     
+            for i in response.contexts.contexts:
+                print(i)
             return response
         except Exception as e:
             self.logger.exception(f"Error during Vertex AI Search retrieval: {e}")
