@@ -1,7 +1,7 @@
 import logging
 import vertexai
 from vertexai import rag
-from typing
+from models.context import Context
 
 class VertexAIRagClient:
     """Wrapper class that calls Vertex AI RAG engine to retrieve context."""
@@ -18,7 +18,7 @@ class VertexAIRagClient:
             self.logger.exception(e)
             exit(1)
             
-    def run_context_retrieval(self, query: str):
+    def run_context_retrieval(self, query: str) -> list[Context] | None:
         """Perform similarity search on Vertex AI search app, returing results."""        
         rag_retrieval_config = self._rag_retrieval_config()
         rag_corpus = self._rag_corpus_resoruce()
@@ -32,15 +32,9 @@ class VertexAIRagClient:
                 ],
                 rag_retrieval_config=rag_retrieval_config
             )
-
-            self.logger.info("Type of response object: ")
-            self.logger.info(type(response))
-            self.logger.info("Dir of response object: ")
-            self.logger.info(dir(response))
                     
-            for i in response.contexts.contexts:
-                print(i)
-            return response
+            raw_contexts = response.contexts.contexts            
+            return [Context.from_proto(proto) for proto in raw_contexts]
         except Exception as e:
             self.logger.exception(f"Error during Vertex AI Search retrieval: {e}")
             return None
