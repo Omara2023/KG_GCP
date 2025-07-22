@@ -23,12 +23,14 @@ class QueryView(MethodView):
         logger.info(f"User query: '{user_query}'")
 
         vertex_service = VertexRagService()
-        if vertex_service.search(user_query):
+        if (response := vertex_service.search(user_query)):
             logger.info("Successfully retrieved contexts from RAG engine.")
+            return jsonify({"response": response}), 200
         else:
             logger.info("Failed to retrieve contexts from RAG engine.")
+            return jsonify({"error": "Internal server error: failed to retrieve contexts"}), 500
 
-        return jsonify({"Backend completed excection successfully."}), 200
+        
         
         # gemini_service = GeminiService()
         # response = gemini_service.respond(user_query, contexts)

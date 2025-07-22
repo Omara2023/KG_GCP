@@ -2,6 +2,7 @@ import logging
 import vertexai
 from vertexai import rag
 
+
 class VertexAIRagClient:
     """Wrapper class that calls Vertex AI RAG engine to retrieve context."""
 
@@ -17,7 +18,7 @@ class VertexAIRagClient:
             self.logger.exception(e)
             exit(1)
             
-    def run_context_retrieval(self, query: str) -> bool:
+    def run_context_retrieval(self, query: str):
         """Perform similarity search on Vertex AI search app, returing results."""        
         rag_retrieval_config = self._rag_retrieval_config()
         rag_corpus = self._rag_corpus_resoruce()
@@ -32,12 +33,15 @@ class VertexAIRagClient:
                 rag_retrieval_config=rag_retrieval_config
             )
 
-            self.logger.info(response)
-            return True
+            self.logger.info("Type of response object: ")
+            self.logger.info(type(response))
+            self.logger.info("Dir of response object: ")
+            self.logger.info(dir(response))
                     
+            return response
         except Exception as e:
             self.logger.exception(f"Error during Vertex AI Search retrieval: {e}")
-            return False
+            return None
     
     def _rag_corpus_resoruce(self) -> str:
         """Return fully qualified name of Rag corpus."""
