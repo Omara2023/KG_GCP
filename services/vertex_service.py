@@ -1,5 +1,5 @@
 import os
-from clients.vertex_ai_client import VertexAIRagClient
+from clients.vertex_ai_rag_client import VertexAIRagClient
 
 class VertexRagService:
     def __init__(self):
