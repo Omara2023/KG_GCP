@@ -14,3 +14,10 @@ class Context:
             source_uri=proto_ctx.source_uri,
             score = proto_ctx.score,
         )
+    
+    def to_dict(self) -> dict:
+        return {
+            "text": self.text,
+            "source_uri": self.source_uri,
+            "score": self.score,
+        }
