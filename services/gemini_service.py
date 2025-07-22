@@ -1,6 +1,7 @@
 import os 
 import logging
 from clients.gemini_client import GeminiClient
+from models.context import Context
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +17,7 @@ class GeminiService:
             raise ValueError(f"Missing required environment variable: {var_name}")
         return value
 
-    def respond(self, query: str, contexts: list):
+    def respond(self, query: str, contexts: list[Context]):
         if not contexts:
             logger.info("No relevant contexts found. Responding without grounding.")
             return self.client.generate_response(query, [])
