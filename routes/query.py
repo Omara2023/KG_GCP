@@ -31,6 +31,6 @@ class QueryView(MethodView):
         gemini_service = GeminiService()
         response = gemini_service.respond(user_query, contexts)
 
-        return jsonify({"response": response}), 200
+        return jsonify(response), 200
     
 query_bp.add_url_rule('/query', view_func=QueryView.as_view("query_post"))
