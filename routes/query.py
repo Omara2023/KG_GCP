@@ -2,7 +2,7 @@ import logging
 from flask import Blueprint, request, jsonify
 from flask.views import MethodView
 from services.vertex_service import VertexRagService
-from services.gemini_service import GeminiService
+#from services.gemini_service import GeminiService
 
 logger = logging.getLogger(__name__)
 query_bp = Blueprint("query", __name__)
