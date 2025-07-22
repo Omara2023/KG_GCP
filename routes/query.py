@@ -23,9 +23,10 @@ class QueryView(MethodView):
         logger.info(f"User query: '{user_query}'")
 
         vertex_service = VertexRagService()
-        if (response := vertex_service.search(user_query)):
+        if (contexts := vertex_service.search(user_query)):
             logger.info("Successfully retrieved contexts from RAG engine.")
-            return jsonify({"response": response}), 200
+            response_contexts = [ctx.to_dict() for ctx in contexts] 
+            return jsonify({"response": response_contexts}), 200
         else:
             logger.info("Failed to retrieve contexts from RAG engine.")
             return jsonify({"error": "Internal server error: failed to retrieve contexts"}), 500
