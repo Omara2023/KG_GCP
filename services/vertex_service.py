@@ -15,5 +15,5 @@ class VertexRagService:
             raise ValueError(f"Missing required environment variable: {var_name}")
         return value
 
-    def search(self, query: str) -> list[Context] | None:
+    def search(self, query: str) -> list[Context]:
         return self.caller.run_context_retrieval(query)

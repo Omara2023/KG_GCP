@@ -18,7 +18,7 @@ class VertexAIRagClient:
             self.logger.exception(e)
             exit(1)
             
-    def run_context_retrieval(self, query: str) -> list[Context] | None:
+    def run_context_retrieval(self, query: str) -> list[Context]:
         """Perform similarity search on Vertex AI search app, returing results."""        
         rag_retrieval_config = self._rag_retrieval_config()
         rag_corpus = self._rag_corpus_resoruce()
@@ -37,7 +37,7 @@ class VertexAIRagClient:
             return [Context.from_proto(proto) for proto in raw_contexts]
         except Exception as e:
             self.logger.exception(f"Error during Vertex AI Search retrieval: {e}")
-            return None
+            return []
     
     def _rag_corpus_resoruce(self) -> str:
         """Return fully qualified name of Rag corpus."""
