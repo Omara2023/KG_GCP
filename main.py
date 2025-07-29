@@ -1,6 +1,6 @@
 import os
 from flask import Flask
-from logging_config import setup_logging
+from logging_modules.logging_config import setup_logging
 from routes.query import query_bp
 
 def create_app():

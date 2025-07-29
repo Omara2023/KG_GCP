@@ -1,7 +1,6 @@
 import logging
 from google.cloud import bigquery
-from typing import List
-from models.logEntry import LogEntry
+from models.log_entry import LogEntry
 
 class BigQueryClient:
     """Class to insert BigQuery logging records."""
@@ -12,10 +11,10 @@ class BigQueryClient:
         self.client = bigquery.Client()
         self.logger = logging.getLogger(__name__)
 
-    def insert_rows(self, rows: List[LogEntry]) -> bool:
-        data = [row.to_dict() for row in rows]
+    def insert_rows(self, row: LogEntry) -> bool:
+        data = row.to_dict()
         table = self._table()
-        errors = self.client.insert_rows_json(table=table, json_rows=data)
+        errors = self.client.insert_rows_json(table=table, json_rows=[data])
 
         if errors:
             self.logger.error("Encountered errors while inserting row: ", errors)
