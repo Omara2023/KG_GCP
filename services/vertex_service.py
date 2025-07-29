@@ -1,6 +1,6 @@
 import os
 from clients.vertex_ai_rag_client import VertexAIRagClient
-from models.context import Context
+from models.context import RetrievedContext
 
 class VertexRagService:
     def __init__(self):
@@ -15,5 +15,5 @@ class VertexRagService:
             raise ValueError(f"Missing required environment variable: {var_name}")
         return value
 
-    def search(self, query: str) -> list[Context]:
+    def search(self, query: str) -> list[RetrievedContext]:
         return self.caller.run_context_retrieval(query)

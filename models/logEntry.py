@@ -2,7 +2,6 @@ from dataclasses import dataclass, asdict
 from typing import List
 from models.context import RetrievedContext
 
-
 @dataclass
 class LogEntry:
     user_query: str
