@@ -6,9 +6,9 @@ from models.context import RetrievedContext
 class LogEntry:
     user_query: str
     retrieved_contexts: List[RetrievedContext]
-    output: str
+    llm_output: str
+    timestamp: str
     latency: float
-    created_at: str
-
+    
     def to_dict(self) -> dict:
         return asdict(self)

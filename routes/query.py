@@ -37,8 +37,7 @@ class QueryView(MethodView):
 
         big_query_service = BigQueryService()
         elapsed = (datetime.now()  - start).total_seconds()
-        log_entry = LogEntry(user_query, contexts, response["response"], elapsed, datetime.now().isoformat())
-        logger.info(f"LogEntry:{log_entry}")
+        log_entry = LogEntry(user_query, contexts, response["response"], datetime.now().isoformat(), elapsed)
         big_query_service.log_query(log_entry)
 
         return jsonify(response), 200
