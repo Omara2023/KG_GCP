@@ -1,8 +1,11 @@
 import logging 
+from datetime import datetime 
 from flask import Blueprint, request, jsonify
 from flask.views import MethodView
 from services.vertex_service import VertexRagService
 from services.gemini_service import GeminiService
+from services.big_query_service import BigQueryService
+from models.log_entry import LogEntry
 
 logger = logging.getLogger(__name__)
 query_bp = Blueprint("query", __name__)
@@ -10,6 +13,7 @@ query_bp = Blueprint("query", __name__)
 class QueryView(MethodView):
     def post(self):
         """Handles incoming POST requests with a user query, performs RAG, and returns the grounded answer."""
+        start = datetime.now()
         if not request.is_json:
             logger.info("Request not isn't JSON.")
             return jsonify({"error": "Request must be JSON"}), 400
@@ -30,6 +34,11 @@ class QueryView(MethodView):
         
         gemini_service = GeminiService()
         response = gemini_service.respond(user_query, contexts)
+
+        big_query_service = BigQueryService()
+        elapsed = (datetime.now()  - start).total_seconds()
+        log_entry = LogEntry(user_query, contexts, response["response"], elapsed, datetime.now().isoformat())
+        big_query_service.log_query(log_entry)
 
         return jsonify(response), 200
     

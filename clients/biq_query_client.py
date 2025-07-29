@@ -11,17 +11,15 @@ class BigQueryClient:
         self.client = bigquery.Client()
         self.logger = logging.getLogger(__name__)
 
-    def insert_rows(self, row: LogEntry) -> bool:
+    def insert_rows(self, row: LogEntry) -> None:
         data = row.to_dict()
         table = self._table()
         errors = self.client.insert_rows_json(table=table, json_rows=[data])
 
         if errors:
             self.logger.error("Encountered errors while inserting row: ", errors)
-            return True
         else:
             self.logger.info("Inserted entry successfully!")
-            return False
 
     def _table(self) -> str:
         """Return fully qualified BigQuery table_id."""

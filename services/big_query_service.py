@@ -9,5 +9,5 @@ class BigQueryService(EnvMixin):
         self.table_id = self._get_env("GCP_BQ_TABLE_ID")
         self.client = BigQueryClient(self.project_id, self.dataset_id, self.table_id)
 
-    def log_query(self, log_entry: LogEntry) -> bool:
-        return self.client.insert_rows(log_entry)
+    def log_query(self, log_entry: LogEntry):
+        self.client.insert_rows(log_entry)
