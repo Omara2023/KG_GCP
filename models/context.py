@@ -1,23 +1,20 @@
-from dataclasses import dataclass
-from typing import Any
+from dataclasses import dataclass, asdict
+from typing import Optional, Any
 
 @dataclass
-class Context:
+class RetrievedContext:
     text: str
-    source_uri: str
-    score: float
+    source_file: Optional[str] = None
+    score: Optional[float] = None
 
     @classmethod
-    def from_proto(cls, proto_ctx: Any) -> "Context":
+    def from_proto(cls, proto_ctx: Any) -> "RetrievedContext":
         return cls(
             text=proto_ctx.text,
-            source_uri=proto_ctx.source_uri,
+            source_file=proto_ctx.source_uri,
             score = proto_ctx.score,
         )
     
     def to_dict(self) -> dict:
-        return {
-            "text": self.text,
-            "source_uri": self.source_uri,
-            "score": self.score,
-        }
+        return asdict(self)
+    
