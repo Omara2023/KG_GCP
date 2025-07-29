@@ -40,7 +40,7 @@ class GeminiClient:
     def _prompt_with_context(self, user_query: str, contexts: List[RetrievedContext]) -> str:
         prompt_parts = ["\n\n--- Retrieved Contexts ---"]
         for i, context in enumerate(contexts):
-            prompt_parts.append(f"\nContext {i+1}:\n{context.text}")
+            prompt_parts.append(f"\nContext {i+1}:\nSource:{context.source_file}\nText:{context.text}")
         prompt_parts.append("\n-------------------------\n")
         prompt_parts.append("Using the above contexts, answer the following question as accurately as possible.")
         prompt_parts.append(f"\n\nUser's Question: {user_query}")
