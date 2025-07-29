@@ -16,7 +16,6 @@ class GeminiClient:
         """Returns a dictionary with the generated answer and a list of all unique citations."""
         full_prompt = self._construct_prompt(user_query, contexts)
 
-        self.logger.info(full_prompt[:500])
         try:
             response = self.client.models.generate_content(
                 model=self.model_name,
