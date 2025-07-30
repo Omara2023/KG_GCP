@@ -1,16 +1,42 @@
-import os
-from flask import Flask
+from fastapi import FastAPI, Depends
+from pydantic import BaseModel
+from datetime import datetime
 from logging_modules.logging_config import setup_logging
-from routes.query import query_bp
 
-def create_app():
-    """Factory method to produce Flask App."""
-    app_logger = setup_logging()
-    app = Flask(__name__)
-    app.register_blueprint(query_bp)
-    return app
+from services.vertex_service import VertexRagService
+from services.gemini_service import GeminiService
+from services.big_query_service import BigQueryService
+from models.log_entry import LogEntry
 
-app = create_app()
+class UserQuery(BaseModel):
+    text: str
 
-if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))
+app = FastAPI()
+
+logger = setup_logging()
+
+@app.post("/query")
+async def service_query(query: UserQuery,
+                        vertex_service: VertexRagService = Depends):
+    start = datetime.now()
+
+    logger.info(f"User query: '{query.text}'")
+
+    vertex_service = VertexRagService() 
+    if (contexts := vertex_service.search(query.text)):
+        logger.info("Successfully retrieved contexts from RAG engine.")
+    else:
+        logger.info("Failed to retrieve contexts from RAG engine.")     
+    
+    gemini_service = GeminiService()
+    response = gemini_service.respond(query.text, contexts)
+
+    big_query_service = BigQueryService()
+    elapsed = (datetime.now()  - start).total_seconds()
+    log_entry = LogEntry(query.text, contexts, response["response"], datetime.now().isoformat(), elapsed)
+    big_query_service.log_query(log_entry)
+
+    return response
+
+
+
