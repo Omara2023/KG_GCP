@@ -1,4 +1,4 @@
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass
 from typing import List
 from models.context import RetrievedContext
 
@@ -11,4 +11,10 @@ class LogEntry:
     latency: float
     
     def to_dict(self) -> dict:
-        return asdict(self)
+        return {
+            "user_query": self.user_query,
+            "retrieved_contexts": [ctx.to_dict() for ctx in self.retrieved_contexts],
+            "llm_output": self.llm_output,
+            "timestamp": self.timestamp,
+            "latency": self.latency             
+        }
