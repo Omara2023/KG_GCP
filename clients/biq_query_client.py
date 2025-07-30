@@ -13,8 +13,7 @@ class BigQueryClient:
         self.logger = logging.getLogger(__name__)
 
     def insert_rows(self, row: LogEntry) -> None:
-        data = row.to_dict()
-        self.logger.info(json.dumps(data, indent=2))
+        data = row.model_dump()
         table = self._table()
         errors = self.client.insert_rows_json(table=table, json_rows=[data])
 
