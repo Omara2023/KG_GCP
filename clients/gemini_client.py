@@ -3,6 +3,7 @@ from typing import List, Dict, Any
 from google import genai
 from google.genai import types
 from models.context import RetrievedContext
+from models.llm_response import LLMResponse
 
 class GeminiClient:
     """Wrapper class to generate responses using Gemini, grounded by the retrieved contexts."""
@@ -12,7 +13,7 @@ class GeminiClient:
         self.model_name = model_name
         self.logger = logging.getLogger(__name__)
 
-    def generate_response(self, user_query: str, contexts: List[RetrievedContext]) -> Dict[str, Any]:
+    def generate_response(self, user_query: str, contexts: List[RetrievedContext]) -> LLMResponse:
         """Returns a dictionary with the generated answer and a list of all unique citations."""
         full_prompt = self._construct_prompt(user_query, contexts)
 
@@ -22,12 +23,15 @@ class GeminiClient:
                 contents=full_prompt,
                 config=self._generate_content_config()
             )
+
+            if response.text is None:
+                raise ValueError("Gemini returnd no text.")
             generated_text = response.text
         except Exception as e:
             self.logger.exception(f"Error during Gemini generation: {e}")
             generated_text = "I apologize, but I encountered an error while generating a response."
-
-        return {"response": generated_text}
+        
+        return LLMResponse(text=generated_text)
 
     def _construct_prompt(self, user_query: str, contexts: List[RetrievedContext]) -> str:
         """Builds the full prompt for Gemini, adapting based on context availability."""

@@ -7,18 +7,14 @@ from services.big_query_service import BigQueryService, get_big_query_service
 from models.user_query import UserQuery
 from models.log_entry import LogEntry
 from models.context import RetrievedContext
+from models.llm_response import LLMResponse
 
 app = FastAPI()
 
 logger = setup_logging()
 
 @app.post("/query")
-async def service_query(
-    query: UserQuery,
-    vertex_service: VertexRagService = Depends(get_vertex_service),
-    gemini_service: GeminiService = Depends(get_gemini_service),
-    big_query_service: BigQueryService = Depends(get_big_query_service)):
-    
+async def service_query(query: UserQuery, vertex_service: VertexRagService = Depends(get_vertex_service), gemini_service: GeminiService = Depends(get_gemini_service), big_query_service: BigQueryService = Depends(get_big_query_service)):
     start = datetime.now()
 
     _log_query(query)
@@ -39,14 +35,14 @@ def _get_contexts(service: VertexRagService, query: UserQuery) -> list[Retrieved
         logger.info("Failed to retrieve contexts from RAG engine.")  
     return contexts
 
-def _get_llm_response(service: GeminiService, query: UserQuery, contexts: list[RetrievedContext]) -> dict:
+def _get_llm_response(service: GeminiService, query: UserQuery, contexts: list[RetrievedContext]) -> LLMResponse:
     return service.respond(query.text, contexts)
 
-def _log_to_big_query(service: BigQueryService, query: UserQuery, contexts: list[RetrievedContext], response: dict, start_time: datetime) -> None:
+def _log_to_big_query(service: BigQueryService, query: UserQuery, contexts: list[RetrievedContext], response: LLMResponse, start_time: datetime) -> None:
     elapsed = (datetime.now()  - start_time).total_seconds()
     log_entry = LogEntry(user_query=query.text, 
                          retrieved_contexts=contexts,
-                         llm_output=response["response"], 
+                         llm_output=response.text, 
                          timestamp=datetime.now().isoformat(), 
                          latency=elapsed)
     service.log_query(log_entry)
