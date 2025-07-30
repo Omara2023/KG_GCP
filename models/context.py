@@ -1,8 +1,7 @@
-from dataclasses import dataclass, asdict
+from pydantic import BaseModel
 from typing import Optional, Any
 
-@dataclass
-class RetrievedContext:
+class RetrievedContext(BaseModel):
     text: str
     source_file: Optional[str] = None
     score: Optional[float] = None
@@ -15,6 +14,4 @@ class RetrievedContext:
             score = proto_ctx.score,
         )
     
-    def to_dict(self) -> dict:
-        return asdict(self)
     
