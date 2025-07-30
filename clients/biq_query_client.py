@@ -1,3 +1,4 @@
+import json
 import logging
 from google.cloud import bigquery
 from models.log_entry import LogEntry
@@ -13,6 +14,7 @@ class BigQueryClient:
 
     def insert_rows(self, row: LogEntry) -> None:
         data = row.to_dict()
+        self.logger.info(json.dumps(data, indent=2))
         table = self._table()
         errors = self.client.insert_rows_json(table=table, json_rows=[data])
 
