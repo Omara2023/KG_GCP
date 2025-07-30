@@ -11,3 +11,6 @@ class BigQueryService(EnvMixin):
 
     def log_query(self, log_entry: LogEntry):
         self.client.insert_rows(log_entry)
+
+def get_big_query_service() -> BigQueryService:
+    return BigQueryService()

@@ -1,5 +1,5 @@
-Flask
+fastapi
+uvicorn
 google-cloud-aiplatform
 google-cloud-bigquery
 google-genai
-gunicorn

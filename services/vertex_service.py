@@ -11,3 +11,6 @@ class VertexRagService(EnvMixin):
 
     def search(self, query: str) -> list[RetrievedContext]:
         return self.caller.run_context_retrieval(query)
+    
+def get_vertex_service() -> VertexRagService:
+    return VertexRagService()
