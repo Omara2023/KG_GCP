@@ -15,3 +15,6 @@ class GeminiService(EnvMixin):
             self.logger.info("No relevant contexts found. Responding without grounding.")
             return self.client.generate_response(query, [])
         return self.client.generate_response(query, contexts)
+    
+def get_gemini_service() -> GeminiService:
+    return GeminiService()
