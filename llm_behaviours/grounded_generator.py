@@ -1,5 +1,4 @@
 from clients.gemini_client import GeminiClient
-from models.llm_response import LLMResponse
 from models.context import RetrievedContext
 
 class GroundedAnswerGenerator:
@@ -8,12 +7,12 @@ class GroundedAnswerGenerator:
     def __init__(self, llm_client: GeminiClient):
         self.llm = llm_client
 
-    def generate(self, query: str, contexts: list[RetrievedContext]) -> LLMResponse:
+    def generate(self, query: str, contexts: list[RetrievedContext]) -> str:
         if not contexts:
             return self._ask_without_context(query)
         return self._ask_with_context(query, contexts)
         
-    def _ask_with_context(self, user_query: str, contexts: list[RetrievedContext]) -> LLMResponse:
+    def _ask_with_context(self, user_query: str, contexts: list[RetrievedContext]) -> str:
         prompt_parts = ["\n\n--- Retrieved Contexts ---"]
         for i, context in enumerate(contexts):
             prompt_parts.append(f"\nContext {i+1}:\nSource:{context.source_file}\nText:{context.text}")
@@ -23,7 +22,7 @@ class GroundedAnswerGenerator:
         prompt = "\n".join(prompt_parts)
         return self.llm.prompt(prompt)
 
-    def _ask_without_context(self, user_query: str) -> LLMResponse:
+    def _ask_without_context(self, user_query: str) -> str:
         prompt = (
             "No external context is available for this query. Please answer using your own knowledge, "
             "and clearly state that context was not provided.\n\n"
