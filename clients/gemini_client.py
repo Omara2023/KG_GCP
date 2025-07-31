@@ -1,7 +1,6 @@
 import logging
 from google import genai
 from google.genai import types
-from models.llm_response import LLMResponse
 
 class GeminiClient:
     """Wrapper class to generate responses using Gemini, grounded by the retrieved contexts."""
@@ -11,7 +10,7 @@ class GeminiClient:
         self.model_name = model_name
         self.logger = logging.getLogger(__name__)
 
-    def prompt(self, prompt: str) -> LLMResponse:
+    def prompt(self, prompt: str) -> str:
         try:
             response = self.client.models.generate_content(
                 model=self.model_name,
@@ -26,7 +25,7 @@ class GeminiClient:
             self.logger.exception(f"Error during Gemini generation: {e}")
             generated_text = "I apologize, but I encountered an error while generating a response."
         
-        return LLMResponse(text=generated_text)
+        return generated_text
 
     def _generate_content_config(self) -> types.GenerateContentConfig:
         return types.GenerateContentConfig(
