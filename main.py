@@ -13,7 +13,7 @@ app = FastAPI()
 
 logger = setup_logging()
 
-@app.post("/query")
+@app.post("/query", response_model=LLMResponse)
 async def service_query(query: UserQuery, vertex_service: VertexRagService = Depends(get_vertex_service), gemini_service: GeminiService = Depends(get_gemini_service), big_query_service: BigQueryService = Depends(get_big_query_service)):
     start = datetime.now()
 
