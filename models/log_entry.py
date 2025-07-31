@@ -8,4 +8,6 @@ class LogEntry(BaseModel):
     llm_output: str
     timestamp: str
     latency: float
+    rewritten_query: str | None
+    rewrite_strategy: str #TODO - change to enumerated type
     
