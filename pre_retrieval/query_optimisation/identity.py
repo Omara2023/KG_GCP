@@ -1,6 +1,6 @@
 from pre_retrieval.query_optimisation.base import QueryRewriter
 
-class Indentity(QueryRewriter):
+class IndentityStrategy(QueryRewriter):
     """Unaltered - original query returned."""
 
     def rewrite(self, query: str) -> list[str]:
