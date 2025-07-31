@@ -26,7 +26,7 @@ async def service_query(query: UserQuery, query_rewriter: QueryRewriter = Depend
     logger.info(f"Rewritten query {rewrite_strategy}: '{rewritten_query}'")
 
     contexts = _get_contexts(vertex_service, rewritten_query)
-    response = _get_llm_response(gemini_service, rewritten_query, contexts)
+    response = _get_llm_response(gemini_service, query.text, contexts)
     _log_to_big_query(big_query_service, rewritten_query, contexts, response, start, None if query.text == rewritten_query else rewritten_query, rewrite_strategy)
     
     return response
