@@ -1,3 +1,4 @@
+import os
 from fastapi import FastAPI, Depends
 from datetime import datetime
 from logging_modules.logging_config import setup_logging
@@ -17,37 +18,40 @@ logger = setup_logging()
 
 @app.post("/query", response_model=LLMResponse)
 async def service_query(query: UserQuery, query_rewriter: QueryRewriter = Depends(get_query_rewriter), vertex_service: VertexRagService = Depends(get_vertex_service), gemini_service: GeminiService = Depends(get_gemini_service), big_query_service: BigQueryService = Depends(get_big_query_service)):
+    rewrite_strategy = os.getenv("QUERY_REWRITE_STRATEGY", "identity")
     start = datetime.now()
 
     _log_query(query.text)
     rewritten_query = query_rewriter.rewrite(query.text)[0] #temp assume we return 1 rewritten query. TODO = update to iterate throught list[str] of rewritten queries.
-    logger.info(f"Rewritten query: '{rewritten_query}'")
+    logger.info(f"Rewritten query {rewrite_strategy}: '{rewritten_query}'")
 
     contexts = _get_contexts(vertex_service, rewritten_query)
-    response = _get_llm_response(gemini_service, query, contexts)
-    _log_to_big_query(big_query_service, query, contexts, response, start)
+    response = _get_llm_response(gemini_service, rewritten_query, contexts)
+    _log_to_big_query(big_query_service, rewritten_query, contexts, response, start, None if query == rewritten_query else rewritten_query, rewrite_strategy)
     
     return response
 
 def _log_query(query: str) -> None:
     logger.info(f"User query: '{query}'")
 
-def _get_contexts(service: VertexRagService, query: UserQuery) -> list[RetrievedContext]:
-    contexts = service.search(query.text)
+def _get_contexts(service: VertexRagService, query: str) -> list[RetrievedContext]:
+    contexts = service.search(query)
     if contexts:
         logger.info("Successfully retrieved contexts from RAG engine.")
     else:
         logger.info("Failed to retrieve contexts from RAG engine.")  
     return contexts
 
-def _get_llm_response(service: GeminiService, query: UserQuery, contexts: list[RetrievedContext]) -> LLMResponse:
-    return LLMResponse(text=service.respond(query.text, contexts))
+def _get_llm_response(service: GeminiService, query: str, contexts: list[RetrievedContext]) -> LLMResponse:
+    return LLMResponse(text=service.respond(query, contexts))
 
-def _log_to_big_query(service: BigQueryService, query: UserQuery, contexts: list[RetrievedContext], response: LLMResponse, start_time: datetime) -> None:
+def _log_to_big_query(service: BigQueryService, query: str, contexts: list[RetrievedContext], response: LLMResponse, start_time: datetime, rewritten_query: str|None, rewrite_strategy: str) -> None:
     elapsed = (datetime.now()  - start_time).total_seconds()
-    log_entry = LogEntry(user_query=query.text, 
+    log_entry = LogEntry(user_query=query, 
                          retrieved_contexts=contexts,
                          llm_output=response.text, 
                          timestamp=datetime.now().isoformat(), 
-                         latency=elapsed)
+                         latency=elapsed,
+                         rewritten_query=rewritten_query,
+                         rewrite_strategy=rewrite_strategy)
     service.log_query(log_entry)
