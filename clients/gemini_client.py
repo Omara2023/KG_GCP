@@ -1,5 +1,4 @@
 import logging
-from typing import List, Dict, Any
 from google import genai
 from google.genai import types
 from models.context import RetrievedContext
@@ -13,7 +12,7 @@ class GeminiClient:
         self.model_name = model_name
         self.logger = logging.getLogger(__name__)
 
-    def generate_response(self, user_query: str, contexts: List[RetrievedContext]) -> LLMResponse:
+    def generate_response(self, user_query: str, contexts: list[RetrievedContext]) -> LLMResponse:
         """Returns a dictionary with the generated answer and a list of all unique citations."""
         full_prompt = self._construct_prompt(user_query, contexts)
 
@@ -33,14 +32,14 @@ class GeminiClient:
         
         return LLMResponse(text=generated_text)
 
-    def _construct_prompt(self, user_query: str, contexts: List[RetrievedContext]) -> str:
+    def _construct_prompt(self, user_query: str, contexts: list[RetrievedContext]) -> str:
         """Builds the full prompt for Gemini, adapting based on context availability."""
         if contexts:
             return self._prompt_with_context(user_query, contexts)
         else:
             return self._prompt_without_context(user_query)
 
-    def _prompt_with_context(self, user_query: str, contexts: List[RetrievedContext]) -> str:
+    def _prompt_with_context(self, user_query: str, contexts: list[RetrievedContext]) -> str:
         prompt_parts = ["\n\n--- Retrieved Contexts ---"]
         for i, context in enumerate(contexts):
             prompt_parts.append(f"\nContext {i+1}:\nSource:{context.source_file}\nText:{context.text}")
