@@ -18,7 +18,8 @@ logger = setup_logging()
 
 @app.post("/query", response_model=LLMResponse)
 async def service_query(query: UserQuery, query_rewriter: QueryRewriter = Depends(get_query_rewriter), vertex_service: VertexRagService = Depends(get_vertex_service), gemini_service: GeminiService = Depends(get_gemini_service), big_query_service: BigQueryService = Depends(get_big_query_service)):
-    rewrite_strategy = os.getenv("QUERY_REWRITE_STRATEGY", "identity")
+    # rewrite_strategy = os.getenv("QUERY_REWRITE_STRATEGY", "identity") #this is to do it properly once in prod.
+    rewrite_strategy = "step_back"
     start = datetime.now()
 
     _log_query(query.text)
