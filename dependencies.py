@@ -7,9 +7,10 @@ from llm_behaviours.step_back import StepBackRewriter
 from llm_behaviours.multi_query import MultiQueryExpander
 from llm_behaviours.grounded_generator import GroundedAnswerGenerator
 from services.gemini_service import GeminiService
-
 from clients.biq_query_client import BigQueryClient
 from services.big_query_service import BigQueryService
+from clients.vertex_ai_rag_client import VertexAIRagClient
+from services.vertex_service import VertexRagService
 
 #Gemini factories:
 
@@ -39,12 +40,26 @@ def get_gemini_service(rewriter: QueryRewriter = Depends(get_query_rewriter), ge
 
 #Vertex factories:
 
+def get_vertex_ai_rag_client() -> VertexAIRagClient:
+    project_id = os.getenv("GCP_PROJECT_ID")
+    location = os.getenv("GCP_RAG_CORPUS_REGION")
+    rag_corpus_id = os.getenv("GCP_RAG_CORPUS_ID")
+
+    if project_id is None or location is None or rag_corpus_id is None:
+        raise ValueError("Cannot instantiate vertexai connection with missing env.")
+
+    return VertexAIRagClient(project_id, location, rag_corpus_id)
+
+def get_vertex_service(client: VertexAIRagClient = Depends(get_vertex_ai_rag_client)) -> VertexRagService:
+    return VertexRagService(client)
+
 #Big Query Factories:
 
 def get_big_query_client() -> BigQueryClient:
     project_id=os.getenv("GCP_PROJECT_ID")
     dataset_id=os.getenv("GCP_BQ_DATASET_ID")
     table_id=os.getenv("GCP_BQ_TABLE_ID")
+
     if project_id is None or dataset_id is None or table_id is None:
         raise ValueError("Cannot instantiate BigQuery connection with missing env.")
     
