@@ -1,6 +1,6 @@
 from llm_behaviours.base import QueryRewriter
 
-class Indentity(QueryRewriter):
+class IdentityRewriter(QueryRewriter):
     """Unaltered - original query returned."""
 
     def rewrite(self, query: str) -> list[str]:
