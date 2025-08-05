@@ -1,7 +1,7 @@
 import os
 from fastapi import Depends
 from pre_retrieval.query_optimisation.base import QueryRewriter
-from pre_retrieval.query_optimisation.identity import IndentityStrategy
+from llm_behaviours.identity import IndentityStrategy
 from pre_retrieval.query_optimisation.step_back import StepBackStrategy
 from services.gemini_service import GeminiService, get_gemini_service
 
