@@ -1,4 +1,5 @@
 import json
+import logging
 from llm_behaviours.base import QueryRewriter
 from clients.gemini_client import GeminiClient
 
@@ -7,6 +8,7 @@ class MultiQueryExpander(QueryRewriter):
     
     def __init__(self, llm_client: GeminiClient):
         self.llm = llm_client
+        self.logger = logging.getLogger(__name__)
 
     def rewrite(self, query: str, n = 5) -> list[str]:
         prompt = (
@@ -14,7 +16,14 @@ class MultiQueryExpander(QueryRewriter):
             f"Respond only with a valid JSON array of objects with a single query key. No explanations."
         )
         output = self.llm.prompt(prompt)
-        return self._safe_parse_json(output) 
+        self.logger.info(f"Type before json parsing: {type(output)}")
+        self.logger.info(f"Actual output: {output}")
+
+        to_return = self._safe_parse_json(output) 
+        self.logger.info(f"Type post json parsing: {type(to_return)}")
+        self.logger.info(f"Actual output: {to_return}")
+
+        return to_return
     
     def _safe_parse_json(self, text: str) -> list[str]:
         try:
