@@ -1,8 +1,10 @@
 import json
+from llm_behaviours.base import QueryRewriter
 from clients.gemini_client import GeminiClient
 
-class MultiQueryExpander:
+class MultiQueryExpander(QueryRewriter):
     """Class responsible for generate variations of the original query."""  
+    
     def __init__(self, llm_client: GeminiClient):
         self.llm = llm_client
 

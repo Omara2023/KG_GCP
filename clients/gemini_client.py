@@ -5,7 +5,7 @@ from google.genai import types
 class GeminiClient:
     """Wrapper class to generate responses using Gemini, grounded by the retrieved contexts."""
 
-    def __init__(self, project_id, location, model_name):
+    def __init__(self, project_id, location, model_name="gemini-1.5-flash"):
         self.client = genai.Client(vertexai=True, project=project_id, location=location)
         self.model_name = model_name
         self.logger = logging.getLogger(__name__)

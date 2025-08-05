@@ -1,6 +1,6 @@
-from pre_retrieval.query_optimisation.base import QueryRewriter
+from llm_behaviours.base import QueryRewriter
 
-class IndentityStrategy(QueryRewriter):
+class IdentityRewriter(QueryRewriter):
     """Unaltered - original query returned."""
 
     def rewrite(self, query: str) -> list[str]:

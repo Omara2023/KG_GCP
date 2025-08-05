@@ -1,7 +1,9 @@
+from llm_behaviours.base import QueryRewriter
 from clients.gemini_client import GeminiClient
 
-class StepBackRewriter:
+class StepBackRewriter(QueryRewriter):
     """Class responsible for rewriting queries via step-back logic."""  
+    
     def __init__(self, llm_client: GeminiClient):
         self.llm = llm_client
 

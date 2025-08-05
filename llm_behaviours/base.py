@@ -5,5 +5,5 @@ class QueryRewriter(ABC):
 
     @abstractmethod
     def rewrite(self, query: str) -> list[str]:
-        """Rewrite user query returning a list of 1+ rewritten queries."""
+        """Rewrite user query returning a list of rewritten queries."""
         pass
