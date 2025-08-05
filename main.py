@@ -21,12 +21,16 @@ async def service_query(query: UserQuery, vertex_service: VertexRagService = Dep
     start = datetime.now()
 
     logger.info(f"User query: '{query}'")
-    rewritten_query = gemini_service.rewrite_query(query.text)[0] #temp assume we return 1 rewritten query. TODO = update to iterate throught list[str] of rewritten queries.
-    logger.info(f"Rewritten query {rewrite_strategy}: '{rewritten_query}'")
+    rewritten_queries = gemini_service.rewrite_query(query.text) #temp assume we return 1 rewritten query. TODO = update to iterate throught list[str] of rewritten queries.
+    logger.info(f"{len(rewritten_queries)} rewritten queries derived.")
 
-    contexts = _get_contexts(vertex_service, rewritten_query)
+    contexts = []
+    for q in rewritten_queries:
+        contexts.extend(_get_contexts(vertex_service, q))
+
+    logger.info(f"{len(contexts)} contexts produced in total.")
     response = _get_llm_response(gemini_service, query.text, contexts)
-    _log_to_big_query(big_query_service, query.text, contexts, response, start, None if query.text == rewritten_query else rewritten_query, rewrite_strategy)
+    # _log_to_big_query(big_query_service, query.text, contexts, response, start, None if query.text == rewritten_query else rewritten_query, rewrite_strategy)
     
     return response    
 

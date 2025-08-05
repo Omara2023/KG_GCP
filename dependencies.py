@@ -47,7 +47,6 @@ def get_vertex_ai_rag_client() -> VertexAIRagClient:
 
     if project_id is None or location is None or rag_corpus_id is None:
         raise ValueError("Cannot instantiate vertexai connection with missing env.")
-
     return VertexAIRagClient(project_id, location, rag_corpus_id)
 
 def get_vertex_service(client: VertexAIRagClient = Depends(get_vertex_ai_rag_client)) -> VertexRagService:
@@ -62,7 +61,6 @@ def get_big_query_client() -> BigQueryClient:
 
     if project_id is None or dataset_id is None or table_id is None:
         raise ValueError("Cannot instantiate BigQuery connection with missing env.")
-    
     return BigQueryClient(project_id, dataset_id, table_id)
 
 def get_big_query_service(client: BigQueryClient = Depends(get_big_query_client)) -> BigQueryService:
