@@ -1,12 +1,11 @@
 import os
 from fastapi import FastAPI, Depends
 from datetime import datetime
+from dependencies import get_gemini_service, get_big_query_service, get_vertex_service
 from logging_modules.logging_config import setup_logging
-from services.vertex_service import VertexRagService, get_vertex_service
-from services.gemini_service import GeminiService, get_gemini_service
-from services.big_query_service import BigQueryService, get_big_query_service
-from pre_retrieval.query_optimisation.base import QueryRewriter
-from pre_retrieval.query_optimisation.factory import get_query_rewriter
+from services.vertex_service import VertexRagService
+from services.gemini_service import GeminiService
+from services.big_query_service import BigQueryService
 from models.user_query import UserQuery
 from models.log_entry import LogEntry
 from models.context import RetrievedContext
@@ -17,22 +16,19 @@ app = FastAPI()
 logger = setup_logging()
 
 @app.post("/query", response_model=LLMResponse)
-async def service_query(query: UserQuery, query_rewriter: QueryRewriter = Depends(get_query_rewriter), vertex_service: VertexRagService = Depends(get_vertex_service), gemini_service: GeminiService = Depends(get_gemini_service), big_query_service: BigQueryService = Depends(get_big_query_service)):
+async def service_query(query: UserQuery, vertex_service: VertexRagService = Depends(get_vertex_service), gemini_service: GeminiService = Depends(get_gemini_service), big_query_service: BigQueryService = Depends(get_big_query_service)):
     rewrite_strategy = os.getenv("QUERY_REWRITE_STRATEGY", "identity") #this is to do it properly once in prod.
     start = datetime.now()
 
-    _log_query(query.text)
-    rewritten_query = query_rewriter.rewrite(query.text)[0] #temp assume we return 1 rewritten query. TODO = update to iterate throught list[str] of rewritten queries.
+    logger.info(f"User query: '{query}'")
+    rewritten_query = gemini_service.rewrite_query(query.text)[0] #temp assume we return 1 rewritten query. TODO = update to iterate throught list[str] of rewritten queries.
     logger.info(f"Rewritten query {rewrite_strategy}: '{rewritten_query}'")
 
     contexts = _get_contexts(vertex_service, rewritten_query)
     response = _get_llm_response(gemini_service, query.text, contexts)
     _log_to_big_query(big_query_service, query.text, contexts, response, start, None if query.text == rewritten_query else rewritten_query, rewrite_strategy)
     
-    return response
-
-def _log_query(query: str) -> None:
-    logger.info(f"User query: '{query}'")
+    return response    
 
 def _get_contexts(service: VertexRagService, query: str) -> list[RetrievedContext]:
     contexts = service.search(query)
