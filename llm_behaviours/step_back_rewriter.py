@@ -5,10 +5,10 @@ class StepBackRewriter:
     def __init__(self, llm_client: GeminiClient):
         self.llm = llm_client
 
-    def rewrite(self, query: str) -> str:
+    def rewrite(self, query: str) -> list[str]:
         prompt = (
             "You are a helpful assistant.\n"
             f"Rewrite the following user query into a more general or informative form for knowledge retrieval:\n\n"
             f"Original query: {query}"
         )
-        return self.llm.prompt(prompt)
+        return [self.llm.prompt(prompt)]

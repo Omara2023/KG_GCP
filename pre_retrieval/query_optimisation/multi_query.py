@@ -1,8 +1,8 @@
 from pre_retrieval.query_optimisation.base import QueryRewriter
 from services.gemini_service import GeminiService
 
-class StepBackStrategy(QueryRewriter):
-    """Performs step-back rewriting - simplifying and broadening the query."""
+class MultiQueryStrategy(QueryRewriter):
+    """Performs multiqueryexpansion - simplifying and broadening the query."""
 
     def __init__(self, gemini_service: GeminiService):
         self.service = gemini_service

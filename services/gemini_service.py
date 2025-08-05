@@ -18,7 +18,7 @@ class GeminiService(EnvMixin):
     def respond(self, query: str, contexts: list[RetrievedContext]) -> str:
         return self.grounded_generator.generate(query, contexts)
     
-    def rewrite_query(self, query: str) -> str:
+    def rewrite_query(self, query: str) -> list[str]:
         return self.step_back_rewriter.rewrite(query)
     
 def get_gemini_service() -> GeminiService:
