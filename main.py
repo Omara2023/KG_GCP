@@ -30,7 +30,7 @@ async def service_query(query: UserQuery, vertex_service: VertexRagService = Dep
 
     logger.info(f"{len(contexts)} contexts produced in total.")
     response = _get_llm_response(gemini_service, query.text, contexts)
-    # _log_to_big_query(big_query_service, query.text, contexts, response, start, None if query.text == rewritten_query else rewritten_query, rewrite_strategy)
+    _log_to_big_query(big_query_service, query.text, contexts, response, start, None, rewrite_strategy)
     
     return response    
 
