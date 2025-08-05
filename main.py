@@ -25,7 +25,9 @@ async def service_query(query: UserQuery, vertex_service: VertexRagService = Dep
     logger.info(f"{len(rewritten_queries)} rewritten queries derived.")
 
     contexts = []
-    for q in rewritten_queries:
+    for i, q in enumerate(rewritten_queries):
+        logger.info(f"Query {i}){q}")
+        logger.info(type(q))
         contexts.extend(_get_contexts(vertex_service, q))
 
     logger.info(f"{len(contexts)} contexts produced in total.")
