@@ -1,7 +1,8 @@
 import os
+import asyncio
 from fastapi import FastAPI, Depends
 from datetime import datetime
-from dependencies import get_gemini_service, get_big_query_service, get_vertex_service
+from dependencies import get_gemini_service, get_big_query_service, get_vertex_service_factory
 from logging_modules.logging_config import setup_logging
 from services.vertex_service import VertexRagService
 from services.gemini_service import GeminiService
@@ -16,19 +17,21 @@ app = FastAPI()
 logger = setup_logging()
 
 @app.post("/query", response_model=LLMResponse)
-async def service_query(query: UserQuery, vertex_service: VertexRagService = Depends(get_vertex_service), gemini_service: GeminiService = Depends(get_gemini_service), big_query_service: BigQueryService = Depends(get_big_query_service)):
+async def service_query(query: UserQuery, vertex_service_factory = Depends(get_vertex_service_factory) , gemini_service: GeminiService = Depends(get_gemini_service), big_query_service: BigQueryService = Depends(get_big_query_service)):
     rewrite_strategy = os.getenv("QUERY_REWRITE_STRATEGY", "identity") #this is to do it properly once in prod.
     start = datetime.now()
 
-    logger.info(f"User query: '{query}'")
+    logger.info(f"User query: '{query.text}'")
     rewritten_queries = gemini_service.rewrite_query(query.text) #temp assume we return 1 rewritten query. TODO = update to iterate throught list[str] of rewritten queries.
     logger.info(f"{len(rewritten_queries)} rewritten queries derived.")
 
-    contexts = []
-    for q in rewritten_queries:
-        contexts.extend(_get_contexts(vertex_service, q))  #needs to be parallelised
-    
+    async def fetch_contexts(q: str):
+        service = vertex_service_factory()
+        return await asyncio.to_thread(service.search, q)
 
+    nested_results = await asyncio.gather(*(fetch_contexts(q) for q in rewritten_queries))
+    contexts = [item for sublist in nested_results for item in sublist]
+    
     logger.info(f"{len(contexts)} contexts produced in total.")
     contexts = list(set(contexts))
     logger.info(f"{len(contexts)} unique contexts.")
@@ -37,13 +40,6 @@ async def service_query(query: UserQuery, vertex_service: VertexRagService = Dep
     
     return response    
 
-def _get_contexts(service: VertexRagService, query: str) -> list[RetrievedContext]:
-    contexts = service.search(query)
-    if contexts:
-        logger.info("Successfully retrieved contexts from RAG engine.")
-    else:
-        logger.info("Failed to retrieve contexts from RAG engine.")  
-    return contexts
 
 def _get_llm_response(service: GeminiService, query: str, contexts: list[RetrievedContext]) -> LLMResponse:
     return LLMResponse(text=service.respond(query, contexts))

@@ -52,6 +52,11 @@ def get_vertex_ai_rag_client() -> VertexAIRagClient:
 def get_vertex_service(client: VertexAIRagClient = Depends(get_vertex_ai_rag_client)) -> VertexRagService:
     return VertexRagService(client)
 
+def get_vertex_service_factory():
+    def factory() -> VertexRagService:
+        return get_vertex_service(get_vertex_ai_rag_client())  
+    return factory
+
 #Big Query Factories:
 
 def get_big_query_client() -> BigQueryClient:
