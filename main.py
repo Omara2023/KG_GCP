@@ -25,12 +25,13 @@ async def service_query(query: UserQuery, vertex_service: VertexRagService = Dep
     logger.info(f"{len(rewritten_queries)} rewritten queries derived.")
 
     contexts = []
-    for i, q in enumerate(rewritten_queries):
-        logger.info(f"Query {i}){q}")
-        logger.info(type(q))
-        contexts.extend(_get_contexts(vertex_service, q))
+    for q in rewritten_queries:
+        contexts.extend(_get_contexts(vertex_service, q))  #needs to be parallelised
+    
 
     logger.info(f"{len(contexts)} contexts produced in total.")
+    contexts = list(set(contexts))
+    logger.info(f"{len(contexts)} unique contexts.")
     response = _get_llm_response(gemini_service, query.text, contexts)
     _log_to_big_query(big_query_service, query.text, contexts, response, start, None, rewrite_strategy)
     

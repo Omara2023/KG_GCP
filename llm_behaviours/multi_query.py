@@ -16,14 +16,7 @@ class MultiQueryExpander(QueryRewriter):
             f"Respond only with a valid JSON array of objects with a single query key. No explanations."
         )
         output = self.llm.prompt(prompt)
-        self.logger.info(f"Type before json parsing: {type(output)}")
-        self.logger.info(f"Actual output: {output}")
-
-        to_return = self._safe_parse_json(output) 
-        self.logger.info(f"Type post json parsing: {type(to_return)}")
-        self.logger.info(f"Actual output: {to_return}")
-
-        return to_return
+        return self._safe_parse_json(output) 
     
     def _safe_parse_json(self, text: str) -> list[str]:
         try:

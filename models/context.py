@@ -14,4 +14,11 @@ class RetrievedContext(BaseModel):
             score = proto_ctx.score,
         )
     
+    def __eq__(self, other):
+        if isinstance(other, RetrievedContext):
+            return (self.text, self.source_file) == (other.text, other.source_file)
+        return False 
+    
+    def __hash__(self):
+        return hash((self.text, self.source_file))
     
