@@ -5,6 +5,7 @@ from llm_behaviours.base import QueryRewriter
 from llm_behaviours.identity import IdentityRewriter
 from llm_behaviours.step_back import StepBackRewriter
 from llm_behaviours.multi_query import MultiQueryExpander
+from llm_behaviours.sub_query import SubQueryExpander
 from llm_behaviours.grounded_generator import GroundedAnswerGenerator
 from services.gemini_service import GeminiService
 from clients.biq_query_client import BigQueryClient
@@ -29,6 +30,8 @@ def get_query_rewriter(llm_client: GeminiClient = Depends(get_gemini_client)) ->
             return StepBackRewriter(llm_client)
         case "multi_query":
             return MultiQueryExpander(llm_client)
+        case "sub_query":
+            return SubQueryExpander(llm_client)
         case _:
             raise ValueError(f"Unknown query rewrite strategy: {strategy}") 
 
