@@ -20,7 +20,7 @@ async def service_query(query: UserQuery, vertex_service: VertexRagService = Dep
     rewrite_strategy = os.getenv("QUERY_REWRITE_STRATEGY", "identity") #this is to do it properly once in prod.
     start = datetime.now()
 
-    logger.info(f"User query: '{query}'")
+    logger.info(f"User query: '{query.text}'")
     rewritten_queries = gemini_service.rewrite_query(query.text) #temp assume we return 1 rewritten query. TODO = update to iterate throught list[str] of rewritten queries.
     logger.info(f"{len(rewritten_queries)} rewritten queries derived.")
 
