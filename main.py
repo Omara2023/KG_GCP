@@ -24,6 +24,9 @@ async def service_query(query: UserQuery, vertex_service_factory = Depends(get_v
     rewritten_queries = gemini_service.rewrite_query(query.text)
     logger.info(f"{len(rewritten_queries)} rewritten queries derived.")
 
+    for i in rewritten_queries:
+        logger.info(f"{i}")
+
     async def fetch_contexts(q: str):
         service = vertex_service_factory()
         return await asyncio.to_thread(service.search, q)
