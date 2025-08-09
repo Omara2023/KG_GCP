@@ -1,5 +1,5 @@
-from llm_behaviours.base import QueryRewriter
-from llm_behaviours.grounded_generator import GroundedAnswerGenerator 
+from llm_behaviours.pre_retrieval.base import QueryRewriter
+from llm_behaviours.generation.grounded import GroundedAnswerGenerator 
 from models.context import RetrievedContext
 
 class GeminiService:

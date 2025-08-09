@@ -1,4 +1,4 @@
-from llm_behaviours.base import QueryRewriter
+from llm_behaviours.pre_retrieval.base import QueryRewriter
 from clients.gemini_client import GeminiClient
 
 class StepBackRewriter(QueryRewriter):
