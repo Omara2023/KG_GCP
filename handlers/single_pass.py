@@ -2,13 +2,9 @@ import asyncio
 import time
 from functools import wraps
 from typing import Callable
-from logging_modules.logging_config import setup_logging
 from services.vertex_service import VertexRagService
 from services.gemini_service import GeminiService
 from models.llm_response import LLMResponse
-
-
-logger = setup_logging()
 
 def log_duration(func):
     @wraps(func)
@@ -20,7 +16,7 @@ def log_duration(func):
         return result
     return wrapper
 
-async def single_pass(query: str, vertex_service_factory: Callable[[], VertexRagService], rewrite_strategy: str, gemini_service: GeminiService) -> LLMResponse:
+async def single_pass(query: str, vertex_service_factory: Callable[[], VertexRagService], gemini_service: GeminiService) -> LLMResponse:
     """Single-pass RAG implementation: query -> rewrite -> retrieve -> generate."""
     rewritten_queries = gemini_service.rewrite_query(query)
 
