@@ -2,9 +2,10 @@ import json
 from typing import NoReturn
 from clients.gemini_client import GeminiClient
 from models.context import RetrievedContext
+from llm_behaviours.generation.base import AnswerGenerator
 from models.intermediate_llm_response import IntermediateLLMResponse
 
-class IterativeGenerator:
+class IterativeGenerator(AnswerGenerator):
     """Class responsible for the main augmented generation step."""  
     
     def __init__(self, llm_client: GeminiClient):
