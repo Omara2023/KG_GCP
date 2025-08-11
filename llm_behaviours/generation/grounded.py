@@ -1,18 +1,21 @@
 from clients.gemini_client import GeminiClient
+from llm_behaviours.generation.base import AnswerGenerator
 from models.context import RetrievedContext
+from models.llm_response import LLMResponse
+from models.terminal_llm_response import TerminalLLMResponse
 
-class GroundedAnswerGenerator:
+class GroundedAnswerGenerator(AnswerGenerator):
     """Class responsible for the main augmented generation step."""  
     
     def __init__(self, llm_client: GeminiClient):
         self.llm = llm_client
 
-    def generate(self, query: str, contexts: list[RetrievedContext]) -> str:
+    def generate(self, query: str, contexts: list[RetrievedContext]) -> LLMResponse:
         if not contexts:
             raise ValueError("No contexts given to grounded answer generator.")
         return self._ask_with_context(query, contexts)
         
-    def _ask_with_context(self, user_query: str, contexts: list[RetrievedContext]) -> str:
+    def _ask_with_context(self, user_query: str, contexts: list[RetrievedContext]) -> LLMResponse:
         prompt_parts = ["\n\n--- Retrieved Contexts ---"]
         for i, context in enumerate(contexts):
             prompt_parts.append(f"\nContext {i+1}:\nSource:{context.source_file}\nText:{context.text}")
@@ -20,4 +23,5 @@ class GroundedAnswerGenerator:
         prompt_parts.append("Using the above contexts, answer the following question as accurately as possible.")
         prompt_parts.append(f"\n\nUser's Question: {user_query}")
         prompt = "\n".join(prompt_parts)
-        return self.llm.prompt(prompt)
+        output = self.llm.prompt(prompt)
+        return TerminalLLMResponse(text=output)
