@@ -1,8 +1,10 @@
 import json
-from typing import NoReturn
+from typing import NoReturn, cast
 from clients.gemini_client import GeminiClient
-from models.context import RetrievedContext
+from models.context import Context
+from models.retrieved_context import RetrievedContext
 from llm_behaviours.generation.base import AnswerGenerator
+from models.llm_response import LLMResponse
 from models.intermediate_llm_response import IntermediateLLMResponse
 
 class IterativeGenerator(AnswerGenerator):
@@ -11,11 +13,11 @@ class IterativeGenerator(AnswerGenerator):
     def __init__(self, llm_client: GeminiClient):
         self.llm = llm_client
 
-    def generate(self, query: str, contexts: list[RetrievedContext]) -> IntermediateLLMResponse:
+    def generate(self, query: str, contexts: list[Context]) -> LLMResponse:
         """Answer query using contexts, generating an intermediate answer and a subsequent question."""
-        if not contexts: raise ValueError("No contexts given to grounded answer generator.")        
-
-        output = self._ask_with_context(query, contexts)
+        self._ensure_type(contexts, RetrievedContext)
+        retrieved_contexts = cast(list[RetrievedContext], contexts)
+        output = self._ask_with_context(query, retrieved_contexts)
         response = self._safe_parse_json(output)
         return response
         

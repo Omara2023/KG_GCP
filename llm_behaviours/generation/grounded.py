@@ -1,6 +1,8 @@
+from typing import cast
 from clients.gemini_client import GeminiClient
 from llm_behaviours.generation.base import AnswerGenerator
-from models.context import RetrievedContext
+from models.context import Context
+from models.retrieved_context import RetrievedContext
 from models.llm_response import LLMResponse
 from models.terminal_llm_response import TerminalLLMResponse
 
@@ -10,10 +12,10 @@ class GroundedAnswerGenerator(AnswerGenerator):
     def __init__(self, llm_client: GeminiClient):
         self.llm = llm_client
 
-    def generate(self, query: str, contexts: list[RetrievedContext]) -> LLMResponse:
-        if not contexts:
-            raise ValueError("No contexts given to grounded answer generator.")
-        return self._ask_with_context(query, contexts)
+    def generate(self, query: str, contexts: list[Context]) -> LLMResponse:
+        self._ensure_type(contexts, RetrievedContext)
+        retrieved_contexts = cast(list[RetrievedContext], contexts)
+        return self._ask_with_context(query, retrieved_contexts)
         
     def _ask_with_context(self, user_query: str, contexts: list[RetrievedContext]) -> LLMResponse:
         prompt_parts = ["\n\n--- Retrieved Contexts ---"]
