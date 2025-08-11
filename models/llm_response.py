@@ -1,4 +1,5 @@
 from pydantic import BaseModel
 
 class LLMResponse(BaseModel):
-    text: str 
+    """Abstract Class to model all responses from LLMs."""
+    pass
