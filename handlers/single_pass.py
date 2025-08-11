@@ -4,7 +4,7 @@ from functools import wraps
 from typing import Callable
 from services.vertex_service import VertexRagService
 from services.gemini_service import GeminiService
-from models.llm_response import LLMResponse
+from models.terminal_llm_response import TerminalLLMResponse
 
 def log_duration(func):
     @wraps(func)
@@ -16,7 +16,7 @@ def log_duration(func):
         return result
     return wrapper
 
-async def single_pass(query: str, vertex_service_factory: Callable[[], VertexRagService], gemini_service: GeminiService) -> LLMResponse:
+async def single_pass(query: str, vertex_service_factory: Callable[[], VertexRagService], gemini_service: GeminiService) -> TerminalLLMResponse:
     """Single-pass RAG implementation: query -> rewrite -> retrieve -> generate."""
     rewritten_queries = gemini_service.rewrite_query(query)
 
@@ -25,11 +25,14 @@ async def single_pass(query: str, vertex_service_factory: Callable[[], VertexRag
         return await asyncio.to_thread(service.search, q)
 
     nested_results = await asyncio.gather(*(fetch_contexts(q) for q in rewritten_queries))
-    contexts = [item for sublist in nested_results for item in sublist]
-    contexts = list(set(contexts))
+    contexts = list({item for sublist in nested_results for item in sublist})
+
+    output = gemini_service.respond(query, contexts)
+
+    if (isinstance(output, TerminalLLMResponse)):
+        return output
+    raise ValueError(f"Incorrect return type: {type(output)} instead of expected: {type(TerminalLLMResponse(text=''))}")
     
-    response = LLMResponse(text=gemini_service.respond(query, contexts))
-    return response    
 
 
 # def _log_to_big_query(service: BigQueryService, query: str, contexts: list[RetrievedContext], response: LLMResponse, start_time: datetime, rewritten_query: str|None, rewrite_strategy: str) -> None:
