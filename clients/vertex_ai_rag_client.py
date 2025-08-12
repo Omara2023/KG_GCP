@@ -1,7 +1,7 @@
 import logging
 import vertexai
 from vertexai import rag
-from models.context import RetrievedContext
+from models.retrieved_context import RetrievedContext
 
 class VertexAIRagClient:
     """Wrapper class that calls Vertex AI RAG engine to retrieve context."""
