@@ -16,9 +16,9 @@ class MultiQueryExpander(QueryRewriter):
             f"Respond only with a valid JSON array of objects with a single query key. No explanations."
         )
         output = self.llm.prompt(prompt)
-        return self._safe_parse_json(output) 
+        return self._safe_parse_json_list(output) 
     
-    def _safe_parse_json(self, text: str) -> list[str]:
+    def _safe_parse_json_list(self, text: str) -> list[str]:  #TODO refactor subquery and multi-query to either use inheritance or mixin for json loading list method
         try:
             data = json.loads(text)
         except json.JSONDecodeError:
