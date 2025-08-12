@@ -3,8 +3,8 @@ import vertexai
 from vertexai import rag
 from models.retrieved_context import RetrievedContext
 
-class VertexAIRagClient:
-    """Wrapper class that calls Vertex AI RAG engine to retrieve context."""
+class VertexRetrievalClient:
+    """Wrapper class performs Vertex AI RAG engine semantic search for contexts."""
 
     def __init__(self, project_id: str, location: str, rag_corpus_id: str):
         self.project_id = project_id
