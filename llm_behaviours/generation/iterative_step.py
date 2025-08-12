@@ -7,7 +7,7 @@ from llm_behaviours.generation.base import AnswerGenerator
 from models.llm_response import LLMResponse
 from models.intermediate_llm_response import IntermediateLLMResponse
 
-class IterativeGenerator(AnswerGenerator):
+class IterativeStepGenerator(AnswerGenerator):
     """Class responsible for the main augmented generation step."""  
     
     def __init__(self, llm_client: GeminiClient):
