@@ -8,9 +8,9 @@ from clients.vertex_retrieval_client import VertexRetrievalClient
 from llm_behaviours.generation.base import AnswerGenerator
 
 class SinglePassRAGOrchestrator(BaseRAGOrchestrator):
-    """Baseline ewrite, semnatic search retrieve, generate pipeline."""
+    """Baseline rewrite, semantic retrieval, generate pipeline."""
 
-    def ___init__(self, query_rewriter: QueryRewriter, retriever_factory: Callable[[], VertexRetrievalClient], generator: AnswerGenerator):
+    def __init__(self, query_rewriter: QueryRewriter, retriever_factory: Callable[[], VertexRetrievalClient], generator: AnswerGenerator):
         self.query_rewriter = query_rewriter
         self.retriever_factory = retriever_factory
         self.generator = generator
