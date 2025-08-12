@@ -10,8 +10,11 @@ from llm_behaviours.pre_retrieval.multi_query import MultiQueryExpander
 from llm_behaviours.pre_retrieval.sub_query import SubQueryExpander
 from llm_behaviours.generation.base import AnswerGenerator
 from llm_behaviours.generation.grounded import GroundedAnswerGenerator
+from llm_behaviours.generation.iterative_step import IterativeStepGenerator
+from llm_behaviours.generation.final_answer_aggregator import FinalAnswerAggregator
 from orchestrators.base import BaseRAGOrchestrator
 from orchestrators.single_pass import SinglePassRAGOrchestrator
+from orchestrators.iterative import IterativeRAGOrchestrator
 
 #Gemini factories:
 
@@ -38,6 +41,12 @@ def get_query_rewriter(llm_client: GeminiClient = Depends(get_gemini_client)) ->
 def get_grounded_answer_generator(llm_client: GeminiClient = Depends(get_gemini_client)) -> GroundedAnswerGenerator:
     return GroundedAnswerGenerator(llm_client)
 
+def get_iterative_step_generator(llm_client: GeminiClient = Depends(get_gemini_client)) -> IterativeStepGenerator:
+    return IterativeStepGenerator(llm_client)
+
+def get_final_answer_generator(llm_client: GeminiClient = Depends(get_gemini_client)) -> FinalAnswerAggregator:
+    return FinalAnswerAggregator(llm_client)
+
 #Vertex factories:
 
 def get_vertex_retrieval_client() -> VertexRetrievalClient:
@@ -57,17 +66,20 @@ def get_single_pass_rag_orchestrator(rewriter: QueryRewriter = Depends(get_query
                                      generator: AnswerGenerator = Depends(get_grounded_answer_generator)) -> SinglePassRAGOrchestrator:
     return SinglePassRAGOrchestrator(rewriter, retriever_factory, generator)
 
-def get_iterative_rag_orchestrator():
-    pass
+def get_iterative_rag_orchestrator(rewriter: QueryRewriter = Depends(get_query_rewriter), 
+                                   retriever_factory: Callable[[], VertexRetrievalClient] = get_vertex_retrieval_client, 
+                                   iterative_step_generator: AnswerGenerator = Depends(get_iterative_step_generator),
+                                   final_answer_generator: AnswerGenerator = Depends(get_final_answer_generator)) -> IterativeRAGOrchestrator:
+    return IterativeRAGOrchestrator(rewriter, retriever_factory, iterative_step_generator, final_answer_generator)
 
-def get_orchestrator(single_pass: SinglePassRAGOrchestrator = Depends(get_single_pass_rag_orchestrator)) -> BaseRAGOrchestrator:
+def get_orchestrator(single_pass: SinglePassRAGOrchestrator = Depends(get_single_pass_rag_orchestrator), iterative: IterativeRAGOrchestrator =  Depends(get_iterative_rag_orchestrator)) -> BaseRAGOrchestrator:
     retrieval_strategy = os.getenv("RETRIEVAL_STRATEGY")
     
     match retrieval_strategy:
         case "single_pass":
             return single_pass
-        # case "iterative":
-        #     iterative
+        case "iterative":
+            return iterative
         case _:
             raise ValueError(f"Unknown retrieval strategy: {retrieval_strategy}") 
 
