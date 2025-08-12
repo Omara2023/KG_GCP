@@ -1,4 +1,4 @@
-from typing import cast
+from typing import cast, Sequence
 from clients.gemini_client import GeminiClient
 from llm_behaviours.generation.base import AnswerGenerator
 from models.context import Context
@@ -12,12 +12,12 @@ class GroundedAnswerGenerator(AnswerGenerator):
     def __init__(self, llm_client: GeminiClient):
         self.llm = llm_client
 
-    def generate(self, query: str, contexts: list[Context]) -> LLMResponse:
+    def generate(self, query: str, contexts: Sequence[Context]) -> LLMResponse:
         self._ensure_type(contexts, RetrievedContext)
-        retrieved_contexts = cast(list[RetrievedContext], contexts)
+        retrieved_contexts = cast(Sequence[RetrievedContext], contexts)
         return self._ask_with_context(query, retrieved_contexts)
         
-    def _ask_with_context(self, user_query: str, contexts: list[RetrievedContext]) -> LLMResponse:
+    def _ask_with_context(self, user_query: str, contexts: Sequence[RetrievedContext]) -> LLMResponse:
         prompt_parts = ["\n\n--- Retrieved Contexts ---"]
         for i, context in enumerate(contexts):
             prompt_parts.append(f"\nContext {i+1}:\nSource:{context.source_file}\nText:{context.text}")

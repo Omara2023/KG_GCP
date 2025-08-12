@@ -1,5 +1,5 @@
 import json
-from typing import NoReturn, cast
+from typing import NoReturn, cast, Sequence
 from clients.gemini_client import GeminiClient
 from models.context import Context
 from models.retrieved_context import RetrievedContext
@@ -13,7 +13,7 @@ class IterativeGenerator(AnswerGenerator):
     def __init__(self, llm_client: GeminiClient):
         self.llm = llm_client
 
-    def generate(self, query: str, contexts: list[Context]) -> LLMResponse:
+    def generate(self, query: str, contexts: Sequence[Context]) -> LLMResponse:
         """Answer query using contexts, generating an intermediate answer and a subsequent question."""
         self._ensure_type(contexts, RetrievedContext)
         retrieved_contexts = cast(list[RetrievedContext], contexts)
@@ -21,7 +21,7 @@ class IterativeGenerator(AnswerGenerator):
         response = self._safe_parse_json(output)
         return response
         
-    def _ask_with_context(self, user_query: str, contexts: list[RetrievedContext]) -> str:
+    def _ask_with_context(self, user_query: str, contexts: Sequence[RetrievedContext]) -> str:
         """Construct prompt and invoke LLM."""
         prompt_parts = ["Using the following contexts answer the question.\n"]
         prompt_parts.append("--- Retrieved Contexts ---")
