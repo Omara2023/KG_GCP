@@ -1,4 +1,4 @@
-from llm_behaviours.base import QueryRewriter
+from llm_behaviours.pre_retrieval.base import QueryRewriter
 
 class IdentityRewriter(QueryRewriter):
     """Unaltered - original query returned."""
