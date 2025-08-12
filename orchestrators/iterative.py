@@ -6,14 +6,13 @@ from models.intermediate_llm_response import IntermediateLLMResponse
 from models.llm_answer_context import LLMAnswerContext
 from orchestrators.base import BaseRAGOrchestrator
 from llm_behaviours.pre_retrieval.base import QueryRewriter
-from llm_behaviours.generation.iterative_step import IterativeStepGenerator
-from llm_behaviours.generation.final_answer_aggregator import FinalAnswerAggregator
+from llm_behaviours.generation.base import AnswerGenerator
 from clients.vertex_retrieval_client import VertexRetrievalClient
 
 class IterativeRAGOrchestrator(BaseRAGOrchestrator):
     """Iterative pipeline of generate, re-retrieve n times."""
 
-    def __init__(self, query_rewriter: QueryRewriter, retriever_factory: Callable[[], VertexRetrievalClient], iterative_step_generator: IterativeStepGenerator, final_answer_generator: FinalAnswerAggregator, n: int = 3) -> None:
+    def __init__(self, query_rewriter: QueryRewriter, retriever_factory: Callable[[], VertexRetrievalClient], iterative_step_generator: AnswerGenerator, final_answer_generator: AnswerGenerator, n: int = 3) -> None:
         if n <= 1: raise ValueError(f"Iterative generation cannot be done {n} times.")
         self.query_rewriter = query_rewriter
         self.retriever_factory = retriever_factory
