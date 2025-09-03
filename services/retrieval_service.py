@@ -1,3 +1,4 @@
+import logging
 from clients.vertex_retrieval_client import VertexRetrievalClient
 from clients.gemini_client import GeminiClient
 from agentic.answer_critic import AnswerCritic
@@ -11,8 +12,12 @@ system_instructions = (
 
 async def run(query: str, retriever: VertexRetrievalClient, llm_client: GeminiClient, answer_critic: AnswerCritic, n: int = 1) -> str:
     """Choose retreival strategy, run context retreival, judge answer, iterate if needed and return."""
+    logger = logging.getLogger(__name__)
+    count = 0
     llm_client.system_instruction = system_instructions
     while (n >= 0):
+        logger.info(f"Query: {query}")
+        count += 1
         contexts = [c.text for c in retriever.run_context_retrieval(query)]
         prompt = _format_prompt(query, contexts)
         output = llm_client.prompt(prompt)
@@ -26,6 +31,7 @@ async def run(query: str, retriever: VertexRetrievalClient, llm_client: GeminiCl
                 n -= 1
             else:
                 raise ValueError("Judgement dictionary lacks a follow_up query.")
+    logger.info(f"Recursed {count} times.")
     return output
 
 def _format_prompt(query: str, contexts: list[str]) -> str:

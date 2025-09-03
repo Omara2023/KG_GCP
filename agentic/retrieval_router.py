@@ -16,7 +16,6 @@ class RetrievalRouter(LLMJSONParserMixin):
     def get_retriever(self, query: str) -> VertexRetrievalClient: #refactor to have a family of retriever classes implementing a retiver interface
         prompt = self._contruct_prompt(query)
         output = self.llm.prompt(prompt)
-        self.logger.info(output)
         option = self._safe_parse_json(output)["choice"]
         if option not in self.retrievers:
             raise ValueError("Incorrect retriever type returned by LLM.")
