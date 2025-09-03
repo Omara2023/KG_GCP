@@ -1,3 +1,4 @@
+import logging
 from json import loads
 from typing import Any
 from clients.gemini_client import GeminiClient
@@ -10,10 +11,12 @@ class RetrievalRouter:
         self.retrievers = retrievers
         self.llm = llm_client
         self.llm.system_instruction = "You are an expert decision maker, deciding what type of RAG lookup strategy to use in order to answer user queries factually and usefully."
-        
+        self.logger = logging.getLogger(__name__)
+
     def get_retriever(self, query: str) -> VertexRetrievalClient: #refactor to have a family of retriever classes implementing a retiver interface
         prompt = self._contruct_prompt(query)
         output = self.llm.prompt(prompt)
+        self.logger.info(output)
         option = loads(output)["choice"]
         if option not in self.retrievers:
             raise ValueError("Incorrect retriever type returned by LLM.")
