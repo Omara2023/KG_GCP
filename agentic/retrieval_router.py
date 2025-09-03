@@ -1,11 +1,11 @@
 import logging
-from json import loads
 from typing import Any
 from clients.gemini_client import GeminiClient
 from clients.vertex_retrieval_client import VertexRetrievalClient
+from mixins.llm_json_parser import LLMJSONParserMixin
 #future types: simple, hydrid, keyword???, answer_in_question...
 
-class RetrievalRouter:
+class RetrievalRouter(LLMJSONParserMixin):
     """Decide which retrieval strategy should be used for a query."""
     def __init__(self, retrievers: dict[str, Any], llm_client: GeminiClient):
         self.retrievers = retrievers
@@ -17,7 +17,7 @@ class RetrievalRouter:
         prompt = self._contruct_prompt(query)
         output = self.llm.prompt(prompt)
         self.logger.info(output)
-        option = loads(output)["choice"]
+        option = self._safe_parse_json(output)["choice"]
         if option not in self.retrievers:
             raise ValueError("Incorrect retriever type returned by LLM.")
         return self.retrievers[option]

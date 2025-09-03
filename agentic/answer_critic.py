@@ -1,7 +1,7 @@
-from json import loads, JSONDecodeError
+from mixins.llm_json_parser import LLMJSONParserMixin
 from clients.gemini_client import GeminiClient
 
-class AnswerCritic:
+class AnswerCritic(LLMJSONParserMixin):
     """Evaluates proposed answer to query and coordinates next action."""
 
     def __init__(self, llm_client: GeminiClient):
@@ -12,14 +12,10 @@ class AnswerCritic:
         """LLM decides whether or not the query has been sufficiently answered."""
         prompt = self._construct_prompt(query, answer)
         output = self.llm_client.prompt(prompt)
-        try:
-            judegment_dict = loads(output) 
-            if judegment_dict["verdict"] not in ["satisfactory", "unsatisfactory"]: #replace with enumerated type VERDICT
-                raise ValueError("Incorrect AnswerCritic LLM Output.")
-            return judegment_dict
-        except JSONDecodeError as e:
-            print(e, flush=True)
-            return {}
+        judegment_dict = self._safe_parse_json(output) 
+        if judegment_dict["verdict"] not in ["satisfactory", "unsatisfactory"]: #replace with enumerated type VERDICT
+            raise ValueError("Incorrect AnswerCritic LLM Output.")
+        return judegment_dict
 
     def _construct_prompt(self, query: str, answer: str) -> str:
         return (
