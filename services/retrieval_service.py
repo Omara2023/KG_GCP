@@ -16,7 +16,7 @@ async def run(query: str, retriever: VertexRetrievalClient, llm_client: GeminiCl
     logger = logging.getLogger(__name__)
     count = 0
     llm_client.system_instruction = system_instructions
-    while (n >= 0):
+    while (n > 0):
         logger.info(f"Query: {query}")
         count += 1
         contexts = [c for c in retriever.run_context_retrieval(query)]
