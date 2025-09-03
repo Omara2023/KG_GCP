@@ -13,7 +13,10 @@ class AnswerCritic:
         prompt = self._construct_prompt(query, answer)
         output = self.llm_client.prompt(prompt)
         try:
-            return loads(output)
+            judegment_dict = loads(output) 
+            if judegment_dict["verdict"] not in ["satisfactory", "unsatisfactory"]: #replace with enumerated type VERDICT
+                raise ValueError("Incorrect AnswerCritic LLM Output.")
+            return judegment_dict
         except JSONDecodeError as e:
             print(e, flush=True)
             return {}
