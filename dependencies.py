@@ -7,6 +7,8 @@ from llm_behaviours.pre_retrieval.identity import IdentityRewriter
 from llm_behaviours.pre_retrieval.step_back import StepBackRewriter
 from llm_behaviours.pre_retrieval.multi_query import MultiQueryExpander
 from llm_behaviours.pre_retrieval.sub_query import SubQueryExpander
+from agentic.retrieval_router import RetrievalRouter
+from agentic.answer_critic import AnswerCritic
 
 #Gemini factories:
 
@@ -41,6 +43,17 @@ def get_vertex_retrieval_client() -> VertexRetrievalClient:
         raise ValueError("Cannot instantiate vertexai connection with missing env.")
     return VertexRetrievalClient(project_id, location, rag_corpus_id)
 
+
+#Retriever router factory:
+
+def get_retriever_router(simple: VertexRetrievalClient = Depends(get_vertex_retrieval_client), llm_client: GeminiClient = Depends(get_gemini_client)) -> RetrievalRouter:
+    retrievers = {"simple": simple}
+    return RetrievalRouter(retrievers, llm_client) 
+
+#Answer critic factories:
+
+def get_answer_critic(llm_client: GeminiClient = Depends(get_gemini_client)) -> AnswerCritic:
+    return AnswerCritic(llm_client)
 
 #Big Query Factories:
 
