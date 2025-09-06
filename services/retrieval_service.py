@@ -42,6 +42,12 @@ def _format_prompt(query: str, contexts: list[RetrievedContext]) -> str:
     prompt_parts.append("\n-------------------------\n")
     prompt_parts.append("Using the above contexts, answer the following question as accurately as possible. Enumerate the name of the contexts used in your response before you actual answer.")
     prompt_parts.append(f"\n\nUser's Question: {query}")
+    prompt_parts.append("""Present yout answer in such a way with name referring to source (gcp location removed from file name rendering say a book name.): 
+                        Context 1: (name of context used)
+                        Context 2: (name of context used)
+                        Context n: (name of context used)
+                        
+                        <The answer, referring to which context a given point is drawn from.>""")
     return "\n".join(prompt_parts)
 
 
