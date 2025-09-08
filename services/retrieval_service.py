@@ -2,6 +2,7 @@ import logging
 from clients.vertex_retrieval_client import VertexRetrievalClient
 from clients.gemini_client import GeminiClient
 from agentic.answer_critic import AnswerCritic
+from llm_behaviours.pre_retrieval.base import QueryRewriter
 from models.retrieved_context import RetrievedContext
 
 system_instructions = (
@@ -11,29 +12,51 @@ system_instructions = (
     "but clearly indicate when this is the case. If the question cannot be answered with the context or your own knowledge, say so."
 )
 
-async def run(query: str, retriever: VertexRetrievalClient, llm_client: GeminiClient, answer_critic: AnswerCritic, n: int = 1) -> str:
+async def run(query: str, rewriter: QueryRewriter, retriever: VertexRetrievalClient, llm_client: GeminiClient, answer_critic: AnswerCritic, n: int = 1) -> str:
     """Choose retreival strategy, run context retreival, judge answer, iterate if needed and return."""
     logger = logging.getLogger(__name__)
-    count = 0
     llm_client.system_instruction = system_instructions
-    while (n > 0):
-        logger.info(f"Query: {query}")
-        count += 1
-        contexts = [c for c in retriever.run_context_retrieval(query)]
-        prompt = _format_prompt(query, contexts)
-        output = llm_client.prompt(prompt)
-        judegemnt = answer_critic.judge(query, output)
+    logger.info(f"Received original query: {query}")
+    logger.info(f"Chosen rewrite_strategy: {type(rewriter)}: {rewriter}")
+    logger.info(f"Chosen retrieval strategy: {retriever}")
+    count = 0
 
-        if judegemnt["verdict"] == "satisfactory":
-            break
-        else:
-            if ((next_query := judegemnt.get("follow_up")) is not None):
-                query = next_query
-                n -= 1
+    queries = rewriter.rewrite(query)
+    contexts = []
+    for q in queries:
+        contexts.extend(retriever.run_context_retrieval(q))
+    
+    contexts = list(set(contexts))
+    prompt = _format_prompt(query, contexts)
+    output = llm_client.prompt(prompt)
+    judgement = answer_critic.judge(query, output)
+    
+    if judgement["verdict"] == "satisfactory":
+        logger.info(f"Recursed {count} times.")
+        return output
+    else:
+        if ((next_query := judgement.get("follow_up")) is None):
+            raise ValueError("Judgement dictionary lacks a follow_up query.")
+        query = next_query
+        n -= 1
+
+        while (n > 0):    
+            count += 1
+            contexts = [c for c in retriever.run_context_retrieval(query)]
+            prompt = _format_prompt(query, contexts)
+            output = llm_client.prompt(prompt)
+            judegemnt = answer_critic.judge(query, output)
+
+            if judegemnt["verdict"] == "satisfactory":
+                break
             else:
-                raise ValueError("Judgement dictionary lacks a follow_up query.")
-    logger.info(f"Recursed {count} times.")
-    return output
+                if ((next_query := judegemnt.get("follow_up")) is not None):
+                    query = next_query
+                    n -= 1
+                else:
+                    raise ValueError("Judgement dictionary lacks a follow_up query.")
+        logger.info(f"Recursed {count} times.")
+        return output
 
 def _format_prompt(query: str, contexts: list[RetrievedContext]) -> str:
     prompt_parts = ["\n\n--- Retrieved Contexts ---"]
