@@ -12,15 +12,16 @@ class QueryRewriteRouter(LLMJSONParserMixin):
         self.llm_client.system_instruction = "You are an expert in information sciences. You will be deciding on how best to rewrite/optimise a given query for RAG retrieval from a corpus of documents."
         self.logger = logging.getLogger(__name__)
 
-    def select_rewriter(self, query: str) -> dict:
+    def select_rewriter(self, query: str) -> QueryRewriter:
         """LLM decides which rewriter would be best for input query."""
         prompt = self._construct_prompt(query)
         output = self.llm_client.prompt(prompt)
         judegment_dict = self._safe_parse_json(output) 
-        if judegment_dict["verdict"] not in self.rewriters.keys(): 
+        key = judegment_dict["verdict"]
+        if key not in self.rewriters.keys(): 
             raise ValueError("Incorrect QueryRewriteRouter LLM Output.")
         self._log_outcome(judegment_dict)
-        return judegment_dict
+        return self.rewriters[key]
 
     def _construct_prompt(self, query: str) -> str:
         rewriters_text = "\n".join(f"{k}: {v}." for k, v in self.rewriters.items())
