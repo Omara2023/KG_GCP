@@ -4,12 +4,13 @@ from clients.gemini_client import GeminiClient
 
 class SubQueryExpander(MultipleOutput):
     """Class responsible for generating decomposed parts of the original query."""  
-    
-    DESCRIPTION = "Break down the query into n sub-queries targeting different aspects of the query."
 
     def __init__(self, llm_client: GeminiClient):
         self.llm = llm_client
         self.logger = logging.getLogger(__name__)
+
+    def __str__(self) -> str:
+        return "Break down the query into n sub-queries targeting different aspects of the query."
 
     def rewrite(self, query: str, n = 5) -> list[str]:
         prompt = self._prompt(query, n)

@@ -4,12 +4,13 @@ from clients.gemini_client import GeminiClient
 
 class MultiQueryExpander(MultipleOutput):
     """Class responsible for generate variations of the original query."""  
-
-    DESCRIPTION = "Generate n variations of the query."
     
     def __init__(self, llm_client: GeminiClient):
         self.llm = llm_client
         self.logger = logging.getLogger(__name__)
+
+    def __str__(self) -> str:
+        return "Generate n variations of the query."
 
     def rewrite(self, query: str, n = 5) -> list[str]:
         prompt = self._prompt(query, n)

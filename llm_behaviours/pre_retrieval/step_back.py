@@ -3,11 +3,12 @@ from clients.gemini_client import GeminiClient
 
 class StepBackRewriter(QueryRewriter):
     """Class responsible for rewriting queries via step-back logic."""  
-    
-    DESCRIPTION = "Rewrite the query into a more general/informative form."
 
     def __init__(self, llm_client: GeminiClient):
         self.llm = llm_client
+
+    def __str__(self) -> str:
+        return "Rewrite the query into a more general/informative form."
 
     def rewrite(self, query: str) -> list[str]:
         prompt = self._prompt(query)
