@@ -3,3 +3,6 @@ uvicorn
 google-cloud-aiplatform
 google-cloud-bigquery
 google-genai
+langchain
+langchain-community
+langchain-huggingface
