@@ -4,8 +4,8 @@ from retrievers.base import Retriever
 from models.retrieved_context import RetrievedContext
 
 class VertexRetriever(Retriever):
-    """Wrapper class performs Vertex AI RAG engine semantic search for contexts."""
-
+    """Application-level wrapper that adapts Vertex RAG results."""
+    
     def __init__(self, client: VertexClient):
         self.client = client
         self.logger = logging.getLogger(__name__)
