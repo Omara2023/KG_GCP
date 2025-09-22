@@ -10,21 +10,21 @@ class GCSPDFLoader:
         self.client = storage.Client()
         self.bucket = self.client.bucket(bucket_name)
 
-    def load(self, filename: str) -> list[Document]:
+    def load(self, filename: str) -> Document:
         """Fetch a single PDF from GCS and extract contents into LangChain Document."""
         try:
             blob = self.bucket.blob(filename)
             pdf_bytes = blob.download_as_bytes()
             
-            doc = pymupdf.open(stream=pdf_bytes, filetype="pdf")
-            text = "\n".join(page.get_text("text") for page in doc)
+            with pymupdf.open(stream=pdf_bytes, filetype="pdf") as doc:
+                #Pylance might flag this, but it is correct.
+                text = "\n".join(page.get_text("text") for page in doc) # type: ignore
+                
+            return Document(
+                page_content=text,
+                metadata={"source": f"gs://{self.bucket.name}/{filename}"}
+            )
             
-            return [
-                Document(
-                    page_content=text,
-                    metadata={"source": f"gs://{self.bucket.name}/{filename}"}
-                )
-            ]
         except Exception as e:
             print(f"[Error] Failed to load {filename}: {e}")
             exit(1)
@@ -34,5 +34,5 @@ class GCSPDFLoader:
         documents = []
         for blob in self.bucket.list_blobs(prefix=prefix):
             if blob.name.lower().endswith(".pdf"):
-                documents.extend(self.load(blob.name))
+                documents.append(self.load(blob.name))
         return documents
