@@ -1,5 +1,4 @@
 import logging
-import numpy as np
 from neo4j import Driver
 
 class Neo4jClient:
@@ -26,7 +25,7 @@ class Neo4jClient:
             "CREATE VECTOR INDEX pdf_chunks IF NOT EXISTS FOR (c:Chunk) ON c.embedding"
         ]
         for query in queries:
-            self.driver.execute_query(query)
+            self.driver.execute_query(query) # type: ignore
 
     def store_chunks(self, pdf_id: str, pdf_title: str, chunks: list[dict]):
         """
@@ -46,9 +45,7 @@ class Neo4jClient:
         """
         self.driver.execute_query(query, pdf_id=pdf_id, title=pdf_title, chunks=chunks)
 
-    def knn_search(self, pdf_id: str | None, query_embedding: np.ndarray, n: int = 5) -> list:
-        query_embedding = query_embedding.tolist()
-
+    def knn_search(self, pdf_id: str | None, query_embedding: list[float], n: int = 5) -> list:
         base_query = """
             WITH $query_embedding AS q
             MATCH (c:Chunk)
@@ -67,4 +64,4 @@ class Neo4jClient:
             params["pdf_id"] = pdf_id    
             
         result, _, _ = self.driver.execute_query(query, **params)
-        return [(r["c"], r["score"]) for r in result]
+        return [(r["c.text"], r["score"]) for r in result]
