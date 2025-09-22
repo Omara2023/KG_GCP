@@ -16,28 +16,22 @@ class GraphDBInjector:
         self.logger = logging.getLogger(__name__)
 
     def index_pdf(self, path: str) -> None:
-        """Index one or more PDFs from GCS bucket."""
-        documents = self.pdf_loader.load(path)
-        if not documents:
+        """Index one PDF from GCS bucket."""
+        document = self.pdf_loader.load(path)
+        if not document:
             self.logger.warning(f"No documents returned for {path}")
             return
 
         pdf_id = self._generate_pdf_id()
-        
-        for doc in documents:
-            filename = self._extract_filename(doc)
-        
-            chunks = self.chunker.chunk_text(doc.page_content, 200, 50)
-            docs = [
-                Document(page_content=c, metadata={"source": filename})
-                for c in chunks
-            ]
-            embeddings = self.embedder.embed_chunks(docs).tolist()
-            to_injector = [
-                {"text": c, "embedding": e} for c, e in zip(chunks, embeddings)
-            ]
+        filename = self._extract_filename(document)
+    
+        chunks = self.chunker.chunk_text(document.page_content, 200, 50)
+        embeddings = self.embedder.embed_chunks(chunks)
+        to_injector = [
+            {"text": c, "embedding": e} for c, e in zip(chunks, embeddings)
+        ]
 
-            self.graph_client.store_chunks(pdf_id, filename, to_injector)
+        self.graph_client.store_chunks(pdf_id, filename, to_injector)
 
     def _extract_filename(self, doc: Document) -> str:
         output = doc.metadata.get("source")
