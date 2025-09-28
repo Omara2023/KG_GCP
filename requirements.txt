@@ -1,5 +1,6 @@
 fastapi
 uvicorn
+cloudevents
 google-cloud-aiplatform
 google-cloud-bigquery
 google-genai

@@ -1,4 +1,5 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, Request
+from cloudevents.http import from_http
 from logging_modules.logging_config import setup_logging 
 from models.user_query import UserQuery
 from dependencies import get_gemini_client, get_retriever_router, get_answer_critic, get_rewriter_router
@@ -11,7 +12,7 @@ from clients.gemini_client import GeminiClient
 MAX_ITERATIVE_STEPS = 2
 
 app = FastAPI()
-setup_logging()
+logger = setup_logging()
 
 @app.post("/query")
 async def service_query(
@@ -25,3 +26,11 @@ async def service_query(
     retriever = retriever_router.get_retriever(query.text)
     text = await run(query.text, rewriter, retriever, llm_client, answer_critic, MAX_ITERATIVE_STEPS)
     return {"text": text}
+
+@app.post("/index")
+async def receieve_event(request: Request):
+    event = from_http(request.headers, await request.body())
+    logger.info(f"Got event {event['type']} for {event.data['bucket']}/{event.data['name']}")
+    logger.info(f"event: {event}")
+    logger.info(f"dir(event): {dir(event)}")
+    return {"ok": True}
