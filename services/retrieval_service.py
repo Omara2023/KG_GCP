@@ -1,7 +1,7 @@
 import logging
-from clients.vertex_retrieval_client import VertexRetrievalClient
 from clients.gemini_client import GeminiClient
 from agentic.answer_critic import AnswerCritic
+from retrievers.base import Retriever 
 from llm_behaviours.pre_retrieval.base import QueryRewriter
 from models.retrieved_context import RetrievedContext
 
@@ -12,7 +12,7 @@ system_instructions = (
     "but clearly indicate when this is the case. If the question cannot be answered with the context or your own knowledge, say so."
 )
 
-async def run(query: str, rewriter: QueryRewriter, retriever: VertexRetrievalClient, llm_client: GeminiClient, answer_critic: AnswerCritic, n: int = 1) -> str:
+async def run(query: str, rewriter: QueryRewriter, retriever: Retriever, llm_client: GeminiClient, answer_critic: AnswerCritic, n: int = 1) -> str:
     """Choose retreival strategy, run context retreival, judge answer, iterate if needed and return."""
     logger = logging.getLogger(__name__)
     llm_client.system_instruction = system_instructions

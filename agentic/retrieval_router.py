@@ -1,7 +1,7 @@
 import logging
 from typing import Any
+from retrievers.base import Retriever
 from clients.gemini_client import GeminiClient
-from clients.vertex_retrieval_client import VertexRetrievalClient
 from mixins.llm_json_parser import LLMJSONParserMixin
 #future types: simple, hydrid, keyword???, answer_in_question...
 
@@ -13,7 +13,7 @@ class RetrievalRouter(LLMJSONParserMixin):
         self.llm.system_instruction = "You are an expert decision maker, deciding what type of RAG lookup strategy to use in order to answer user queries factually and usefully."
         self.logger = logging.getLogger(__name__)
 
-    def get_retriever(self, query: str) -> VertexRetrievalClient: #refactor to have a family of retriever classes implementing a retiver interface
+    def get_retriever(self, query: str) -> Retriever: 
         prompt = self._contruct_prompt(query)
         output = self.llm.prompt(prompt)
         option = self._safe_parse_json(output)["choice"]

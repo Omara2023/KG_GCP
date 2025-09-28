@@ -1,12 +1,17 @@
 import os
 from fastapi import Depends
+from neo4j import Driver, GraphDatabase
 from clients.gemini_client import GeminiClient
-from clients.vertex_retrieval_client import VertexRetrievalClient
+from clients.vertex_client import VertexClient
+from clients.neo4j_client import Neo4jClient
+from indexing_pipeline.embedder import Embedder
 from llm_behaviours.pre_retrieval.base import QueryRewriter
 from llm_behaviours.pre_retrieval.identity import IdentityRewriter
 from llm_behaviours.pre_retrieval.step_back import StepBackRewriter
 from llm_behaviours.pre_retrieval.multi_query import MultiQueryExpander
 from llm_behaviours.pre_retrieval.sub_query import SubQueryExpander
+from retrievers.vertex_retriever import VertexRetriever
+from retrievers.graph_retriever import GraphRetriever
 from agentic.retrieval_router import RetrievalRouter
 from agentic.answer_critic import AnswerCritic
 from agentic.query_rewrite_router import QueryRewriteRouter
@@ -35,15 +40,38 @@ def get_query_rewriter(llm_client: GeminiClient = Depends(get_gemini_client)) ->
 
 #Vertex factories:
 
-def get_vertex_retrieval_client() -> VertexRetrievalClient:
+def get_vertex_client() -> VertexClient:
     project_id = os.getenv("GCP_PROJECT_ID")
     location = os.getenv("GCP_RAG_CORPUS_REGION")
     rag_corpus_id = os.getenv("GCP_RAG_CORPUS_ID")
 
     if project_id is None or location is None or rag_corpus_id is None:
         raise ValueError("Cannot instantiate vertexai connection with missing env.")
-    return VertexRetrievalClient(project_id, location, rag_corpus_id)
+    return VertexClient(project_id, location, rag_corpus_id)
 
+def get_vertex_retriever(client: VertexClient = Depends(get_vertex_client)) -> VertexRetriever:
+    return VertexRetriever(client)
+
+#Neo4j factories:
+
+def get_neo4j_driver() -> Driver:
+    uri = os.getenv("NEO4J_URI")
+    username = os.getenv("NEO4J_USERNAME")
+    password = os.getenv("NEO4J_PASSWORD")
+
+    if uri is None or username is None or password is None:
+        exit(1)
+
+    return GraphDatabase.driver(uri, auth=(username, password))
+
+def get_neo4j_client(driver: Driver = Depends(get_neo4j_driver)) -> Neo4jClient:
+    return Neo4jClient(driver)
+
+#Graph DB factories:
+
+def get_graph_retriever(client: Neo4jClient = Depends(get_neo4j_client)) -> GraphRetriever:
+    embedder = Embedder() #change this to use DI and extend to use ENV for different embedding types project wide.
+    return GraphRetriever(embedder, client)
 
 #Rewriter router factory:
 
@@ -60,8 +88,10 @@ def get_rewriter_router(llm_client: GeminiClient = Depends(get_gemini_client)) -
 
 #Retriever router factory:
 
-def get_retriever_router(simple: VertexRetrievalClient = Depends(get_vertex_retrieval_client), llm_client: GeminiClient = Depends(get_gemini_client)) -> RetrievalRouter:
-    retrievers = {"simple": simple}
+def get_retriever_router(vertex: VertexRetriever = Depends(get_vertex_retriever), 
+                         graph: GraphRetriever = Depends(get_graph_retriever),
+                         llm_client: GeminiClient = Depends(get_gemini_client)) -> RetrievalRouter:
+    retrievers = {"graph": graph} # "vertex": vertex, add that back in once vertex is re-enabled.
     return RetrievalRouter(retrievers, llm_client) 
 
 #Answer critic factories:
