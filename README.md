@@ -2,7 +2,7 @@
 
 A comprehensive Retrieval-Augmented Generation (RAG) infrastructure pipeline built on Google Cloud Platform (GCP). The system processes unstructured PDF documents via ingestion pipelines, applies advanced multi-strategy retrieval mechanics, and utilises an n-step LLM critic loop to enforce semantic data grounding.
 
-> **🛠️ Architectural Status (May 2026):** **Work-In-Progress / Architectural Pivot.** The stable, functional core infrastructure was deployed to Cloud Run in August 2025. The repository is currently sitting mid-refactor as part of a planned migration from naive vector proximity search to a hybrid GraphRAG pipeline (Neo4j). As a result, recent commits on the main branch reflect active architectural changes and are non-functional.
+> ** Architectural Status (May 2026):** **Work-In-Progress / Architectural Pivot.** The stable, functional core infrastructure was deployed to Cloud Run in August 2025. The repository is currently sitting mid-refactor as part of a planned migration from naive vector proximity search to a hybrid GraphRAG pipeline (Neo4j). As a result, recent commits on the main branch reflect active architectural changes and are non-functional.
 
 ## System Architecture & Mechanics
 
@@ -30,8 +30,9 @@ To suppress hallucination patterns in retrieval workflows, the generation phase 
 ## Tech Stack
 
 - **Cloud Infrastructure:** Google Cloud Platform (GCP - GCS, Cloud Run, BigQuery)
-- **Core Models:** Vertex AI (Gemini Client & Text Embeddings)
-- **Data Validation & Orchestration:** Python, Pydantic, Vector Search
+- **Key Python Packages:** FastAPI, pymupdf, neo4j (rest in requirements.txt)
+- **Core Models:** Vertex AI (Gemini Client & langhcan hugging face Text Embeddings)
+- **Data Validation & Orchestration:** Pydantic, Vector Search
 - **Data Logging:** BigQuery, Cloud Logging
 
 ## Active Refactor: GraphRAG Migration
